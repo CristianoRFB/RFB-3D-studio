@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+const ModelManager = lazy(() => import('./ModelManager'));
 import {
   createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail,
   signInWithEmailAndPassword, signOut, type User,
@@ -152,6 +153,14 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
         </article>)}
       </div>
       {items.length === 0 && <div className="empty-state">Nenhum design disponível nesta conta.</div>}
+      <details className="blueprint models-panel">
+        <summary>Gestão de modelos por papel e tenant</summary>
+        <div className="blueprint-content">
+          <Suspense fallback={<p role="status">Carregando gestão de modelos...</p>}>
+            <ModelManager user={user} db={services.db} />
+          </Suspense>
+        </div>
+      </details>
       <div className="cloud-quotes">
         <h3>Solicitações autenticadas de orçamento</h3>
         {isPrivateQuoteEnabled() ? <>

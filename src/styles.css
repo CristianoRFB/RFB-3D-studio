@@ -98,3 +98,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{o
 .cloud-quotes{border-top:1px solid #39445f;margin-top:24px;padding-top:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:start}
 .cloud-quotes h3,.cloud-quotes p{flex-basis:100%}
 .cloud-quotes .quote-card{width:100%}
+
+.models-panel{margin:25px 0;background:#192239}
+.models-manager select,.models-manager input{width:100%;min-height:44px;border-radius:10px;color:#f5f4ff;background:#101727;border:1px solid #44526d;padding:10px}
+.models-manager button{margin-top:10px}
