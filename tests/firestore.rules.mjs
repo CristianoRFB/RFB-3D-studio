@@ -50,6 +50,7 @@ try {
   await succeed(setDoc(doc(b.firestore(), 'users', 'bob', 'designs', 'own_bob_1'), validDesign('bob')));
   const designer = env.authenticatedContext('designer1', { role: 'designer', tenantId: 'tenant-a' });
   const vendor = env.authenticatedContext('vendor1', { role: 'vendedor', tenantId: 'tenant-a' });
+  const otherDesigner = env.authenticatedContext('designer3', { role: 'designer', tenantId: 'tenant-a' });
   const admin = env.authenticatedContext('admin1', { role: 'admin', tenantId: 'tenant-a' });
   const otherTenant = env.authenticatedContext('designer2', { role: 'designer', tenantId: 'tenant-b' });
   const model = doc(designer.firestore(), 'tenants', 'tenant-a', 'models', 'aura');
@@ -68,6 +69,10 @@ try {
   await fail(updateDoc(model, { revision: 3, updatedAt: serverTimestamp() }));
   await succeed(updateDoc(model, { status: 'published', revision: 2, updatedAt: serverTimestamp() }));
   await succeed(getDoc(doc(anonymous.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
+  await fail(updateDoc(doc(otherDesigner.firestore(), 'tenants', 'tenant-a', 'models', 'aura'), {
+    title: 'Outro designer', revision: 3, updatedAt: serverTimestamp()
+  }));
+  await fail(deleteDoc(doc(otherDesigner.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
   await fail(updateDoc(doc(vendor.firestore(), 'tenants', 'tenant-a', 'models', 'aura'), { title:'Injected', revision: 3, updatedAt: serverTimestamp() }));
   await fail(deleteDoc(doc(otherTenant.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
   await succeed(deleteDoc(doc(admin.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));

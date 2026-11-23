@@ -75,9 +75,9 @@ export default function ModelManager({ user, db }: { user: User; db: Firestore }
     <div className="record-grid">{models.map(item=><article className="record-card record-body" key={item.id}>
       <h3>{item.title}</h3><p>{item.modelKey} · {item.status} · revisão {item.revision}</p>
       {canEdit&&<div className="record-actions">
-        <button type="button" className="secondary" disabled={busy} onClick={()=>{
+        {(identity.role === 'admin' || item.ownerUid === user.uid) && <button type="button" className="secondary" disabled={busy} onClick={()=>{
           setKey(item.id);setTitle(item.title);setStatus(item.status);
-        }}>Editar</button>
+        }}>Editar</button>}
         {(identity.role==='admin'||item.ownerUid===user.uid)&&
         <button type="button" className="secondary" disabled={busy} onClick={()=>void remove(item)}>Excluir</button>}
       </div>}

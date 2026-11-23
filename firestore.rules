@@ -89,6 +89,7 @@ service cloud.firestore {
         && request.resource.data.revision == 1
         && request.resource.data.createdAt == request.time;
       allow update: if hasTenantRole(tenantId, ['designer','admin'])
+        && (hasTenantRole(tenantId, ['admin']) || resource.data.ownerUid == request.auth.uid)
         && validModel(tenantId)
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.resource.data.modelKey == resource.data.modelKey
