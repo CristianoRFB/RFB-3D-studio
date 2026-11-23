@@ -102,3 +102,9 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{o
 .models-panel{margin:25px 0;background:#192239}
 .models-manager select,.models-manager input{width:100%;min-height:44px;border-radius:10px;color:#f5f4ff;background:#101727;border:1px solid #44526d;padding:10px}
 .models-manager button{margin-top:10px}
+
+.privacy-actions,.privacy-delete{display:flex;flex-direction:column;gap:12px;align-items:flex-start;margin:18px 0;padding:22px;border:1px solid #3d4964;border-radius:14px;background:#202942}
+.privacy-delete{background:#2b2637;border-color:#69546c}
+.privacy-delete label{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.9rem}
+.privacy-delete label input{width:18px;height:18px;accent-color:#b7a4fd}
+.privacy-actions input[type=file]{max-width:100%;font:inherit}

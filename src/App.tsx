@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react';
 const CloudWorkspace = lazy(() => import('./cloud/CloudWorkspace'));
 import { PRESETS } from './presets';
+import { decodeBackup, encodeBackup } from './backup';
 import { inspectGLB } from './glb';
 import product from './product.json';
 import Viewer3D, { Preview2D } from './Viewer3D';
@@ -12,10 +13,10 @@ import { EMPTY_WORKSPACE, STORE_KEY, addCart, createId, createQuote, encodeWorks
 const STEP_KEY = 'rfb:' + product.slug + ':starter-step';
 const DESIGN_KEY = 'rfbstudio:design:v2';
 const LAST_STEP = product.steps.length - 1;
-type Tab = 'studio' | 'catalogo' | 'presets' | 'designs' | 'carrinho' | 'orcamentos' | 'painel' | 'nuvem';
+type Tab = 'studio' | 'catalogo' | 'presets' | 'designs' | 'carrinho' | 'orcamentos' | 'painel' | 'nuvem' | 'privacidade';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'studio', label: 'Estúdio' }, { id: 'catalogo', label: 'Catálogo' }, { id: 'presets', label: 'Presets' }, { id: 'designs', label: 'Meus designs' },
-  { id: 'carrinho', label: 'Carrinho' }, { id: 'orcamentos', label: 'Orçamentos' }, { id: 'painel', label: 'Painel demo' }, { id: 'nuvem', label: 'Minha conta' },
+  { id: 'carrinho', label: 'Carrinho' }, { id: 'orcamentos', label: 'Orçamentos' }, { id: 'painel', label: 'Painel demo' }, { id: 'nuvem', label: 'Minha conta' }, { id: 'privacidade', label: 'Privacidade' },
 ];
 
 function initialDesign(): DesignConfig {
@@ -59,6 +60,8 @@ export default function App() {
   const [importName, setImportName] = useState('');
   const [alert, setAlert] = useState('');
   const [storageStatus, setStorageStatus] = useState<'verificando' | 'salvo' | 'indisponivel'>('verificando');
+  const [confirmLocalDelete, setConfirmLocalDelete] = useState(false);
+  const [online, setOnline] = useState(() => navigator.onLine);
   const [step, setStep] = useState(() => {
     try { return clampStep(Number(window.localStorage.getItem(STEP_KEY) ?? 0), LAST_STEP); }
     catch { return 0; }
@@ -72,6 +75,12 @@ export default function App() {
   const theme = { '--accent': product.accent } as CSSProperties;
 
   useEffect(() => () => { if (importUrl) URL.revokeObjectURL(importUrl); }, [importUrl]);
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); };
+  }, []);
   useEffect(() => {
     try {
       window.localStorage.setItem(DESIGN_KEY, JSON.stringify(normalizeDesign(design)));
@@ -132,6 +141,28 @@ export default function App() {
       setAlert('Link da configuração disponível na barra de endereço. Não contém dados pessoais.');
     } catch { setAlert('Não foi possível criar o link neste navegador.'); }
   };
+  const exportBackup = () => downloadText(
+    'rfb-studio-backup-local.json', encodeBackup(design, workspace, today()), 'application/json'
+  );
+  const importBackup = async (file: File) => {
+    try {
+      if (file.size > 200000) throw new Error('Arquivo muito grande');
+      const backup = decodeBackup(await file.text());
+      setDesign(backup.design); setWorkspace(backup.workspace); setSelectedDesign(null);
+      setImportUrl(null); setImportName(''); setConfirmLocalDelete(false);
+      setAlert('Backup local restaurado neste navegador.');
+    } catch { setAlert('Backup inválido ou incompatível. Nenhum registro foi alterado.'); }
+  };
+  const deleteLocal = () => {
+    if (!confirmLocalDelete) return;
+    setWorkspace(EMPTY_WORKSPACE()); setDesign({ ...INITIAL_DESIGN }); setSelectedDesign(null);
+    setImportUrl(null); setImportName(''); setStep(0); setConfirmLocalDelete(false);
+    try {
+      window.localStorage.removeItem('rfbstudio:demo:v1');
+      window.localStorage.removeItem('rfbstudio:workspace:v1');
+    } catch { /* Ainda ocorre sobrescrita do armazenamento principal pela mudança de estado. */ }
+    setAlert('Registros locais excluídos. Designs armazenados no Firebase NÃO foram afetados.');
+  };
   const exportDesign = () => downloadText('rfb-studio-design.json', JSON.stringify({ catalogVersion: CATALOG_VERSION, config: design }, null, 2), 'application/json');
   const export2D = () => downloadText('rfb-studio-previa-2d.svg', previewSVG(design), 'image/svg+xml');
   return <div className="shell" style={theme}>
@@ -158,6 +189,7 @@ export default function App() {
         <strong>Ambiente de demonstração</strong>
         <span>Catálogo e orçamentos são demonstrativos, sem venda ou envio real. Designs podem ser sincronizados com Firebase somente após configurar o projeto e usar a opção Minha conta. {storageStatus === 'indisponivel' ? 'O armazenamento está indisponível.' : ''}</span>
       </div>
+      {!online && <p role="status" className="feedback">Sem conexão: o estúdio local continua disponível, mas autenticação e sincronização na nuvem podem falhar.</p>}
       {alert && <p className="feedback" role="status">{alert}</p>}
       {tab === 'studio' && <div className="studio-grid">
         <Viewer3D config={design} productId={design.productId} addonId={design.addonId} sizeScale={size.scale} importUrl={importUrl} />
@@ -324,6 +356,32 @@ export default function App() {
           <div><span>Volume de simulações</span><strong>{brl(quoteTotal)}</strong></div>
         </div>
         <div className="empty-state">Para implementar um painel de vendas real será necessária autenticação, autorização por vendedor/tenant, backend de preço e Firestore Rules testadas. Nada disso é simulado como produção.</div>
+      </section>}
+      {tab === 'privacidade' && <section className="content-card" aria-label="Privacidade e dados locais">
+        <div className="section-head"><div><p className="viewer-kicker">CONTROLE DO USUÁRIO</p><h2>Privacidade e dados</h2></div><span className="viewer-tag">SOMENTE NESTE NAVEGADOR</span></div>
+        <p className="helper">Designs locais, carrinho e simulações ficam armazenados no navegador sem conta. Você pode fazer um backup JSON, restaurá-lo ou apagar esses registros. A operação não envia dados para serviços externos.</p>
+        <div className="metrics">
+          <div><span>Designs locais</span><strong>{workspace.designs.length}</strong></div>
+          <div><span>Itens locais</span><strong>{workspace.cart.length}</strong></div>
+          <div><span>Simulações locais</span><strong>{workspace.quotes.length}</strong></div>
+          <div><span>Sincronização</span><strong>{online ? 'Disponível se configurada' : 'Offline'}</strong></div>
+        </div>
+        <div className="privacy-actions">
+          <button type="button" onClick={exportBackup}>Exportar backup local JSON</button>
+          <label className="form-label" htmlFor="backup-file">Restaurar backup JSON</label>
+          <input id="backup-file" type="file" accept=".json,application/json" onChange={e => {
+            const file = e.currentTarget.files?.[0];
+            if (file) void importBackup(file);
+            e.currentTarget.value = '';
+          }}/>
+        </div>
+        <div className="privacy-delete">
+          <h3>Excluir os registros locais</h3>
+          <p className="helper">Essa ação redefine designs, carrinho, simulações e configuração atual. É irreversível neste navegador sem um backup exportado.</p>
+          <label><input type="checkbox" checked={confirmLocalDelete} onChange={e => setConfirmLocalDelete(e.target.checked)}/> Confirmo que desejo apagar meus registros locais.</label>
+          <button type="button" className="secondary" disabled={!confirmLocalDelete} onClick={deleteLocal}>Excluir todos os dados locais</button>
+        </div>
+        <p className="disclaimer">Dados sincronizados com uma conta Firebase NÃO são apagados por esta operação. Na seção Minha conta, cada design remoto pode ser excluído separadamente. Exclusão completa de uma conta Firebase depende de um fluxo de servidor homologado.</p>
       </section>}
       {cloudVisited && <div hidden={tab !== 'nuvem'}>
         <Suspense fallback={<section className="content-card" role="status">Preparando autenticação...</section>}>

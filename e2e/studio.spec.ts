@@ -101,3 +101,35 @@ test('responsividade 320 a 1440px sem rolagem horizontal', async ({ page }) => {
     }
   }
 });
+
+test('privacidade: backup local, exclusão confirmada, importação e aviso offline', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Salvar design local' }).click();
+  await page.getByRole('navigation', { name: 'Seções do estúdio' }).getByRole('button', { name: 'Privacidade' }).click();
+  await expect(page.getByText('Designs locais', { exact: true })).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar backup local JSON' }).click();
+  const backup = await download;
+  expect(backup.suggestedFilename()).toBe('rfb-studio-backup-local.json');
+  const { readFile } = await import('node:fs/promises');
+  const body = await readFile(await backup.path());
+  expect(JSON.parse(body.toString()).workspace.designs).toHaveLength(1);
+  const deleteButton = page.getByRole('button', { name: 'Excluir todos os dados locais' });
+  await expect(deleteButton).toBeDisabled();
+  await page.getByRole('checkbox', { name: 'Confirmo que desejo apagar meus registros locais.' }).check();
+  await deleteButton.click();
+  await expect(page.getByText('Registros locais excluídos.', { exact: false })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Seções do estúdio' }).getByRole('button', { name: 'Meus designs' }).click();
+  await expect(page.getByText('Nenhum design salvo.', { exact: false })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Seções do estúdio' }).getByRole('button', { name: 'Privacidade' }).click();
+  await page.getByLabel('Restaurar backup JSON').setInputFiles({
+    name: 'backup.json', mimeType: 'application/json', buffer: body,
+  });
+  await expect(page.getByText('Backup local restaurado neste navegador.')).toBeVisible();
+  await page.getByRole('navigation', { name: 'Seções do estúdio' }).getByRole('button', { name: 'Meus designs' }).click();
+  await expect(page.getByRole('heading', { name: 'Meu design' })).toBeVisible();
+  await page.context().setOffline(true);
+  await expect(page.getByText('Sem conexão:', { exact: false })).toBeVisible();
+  await page.context().setOffline(false);
+  await expect(page.getByText('Sem conexão:', { exact: false })).toHaveCount(0);
+});
