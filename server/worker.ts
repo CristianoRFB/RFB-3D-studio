@@ -1,3 +1,4 @@
+import { handlePrivateQuotes, type QuoteEnv } from './private-quotes';
 import { CATALOG_VERSION, PRODUCTS, normalizeDesign, quoteLine, type DesignConfig } from '../src/catalog';
 
 /** Cloudflare-compatible handler. This API calculates DEMO prices only; never creates orders. */
@@ -16,11 +17,12 @@ export function isValidDesign(input: unknown): input is DesignConfig {
   const safe = normalizeDesign(value);
   return required.every(key => safe[key as keyof DesignConfig] === value[key]);
 }
-export async function handleRequest(request: Request): Promise<Response> {
+export async function handleRequest(request: Request, env: QuoteEnv = {}): Promise<Response> {
   const pathname = new URL(request.url).pathname;
   if (pathname === '/api/health' && request.method === 'GET') {
     return response(200, { service: 'rfb-studio-demo', status: 'ok', catalogVersion: CATALOG_VERSION });
   }
+  if (pathname === '/api/private/quotes') return handlePrivateQuotes(request, env);
   if (pathname !== '/api/demo-quote') return response(404, { error: 'NOT_FOUND' });
   if (request.method !== 'POST') return response(405, { error: 'METHOD_NOT_ALLOWED' });
   if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) return response(415, { error: 'UNSUPPORTED_MEDIA_TYPE' });
@@ -58,4 +60,9 @@ export async function handleRequest(request: Request): Promise<Response> {
     totalCents: lines.reduce((sum, line) => sum + line.totalCents, 0),
     disclaimer: 'Preços ilustrativos sem validade comercial; sem pedidos, pagamentos ou dados pessoais.' });
 }
-export default { fetch: handleRequest };
+export default {
+  async fetch(request: Request, env: QuoteEnv = {}): Promise<Response> {
+    if (new URL(request.url).pathname.startsWith('/api/')) return handleRequest(request, env);
+    return env.ASSETS ? env.ASSETS.fetch(request) : new Response('Not found', { status: 404 });
+  }
+};
