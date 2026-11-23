@@ -1,0 +1,25 @@
+name: RFB Studio - verificar branch
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/rfb-starter-pack-v1]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependencias (lockfile ainda pendente)
+        run: npm install --no-audit --no-fund
+      - name: Verificar tipos
+        run: npm run typecheck
+      - name: Testes unitarios
+        run: npm run test
+      - name: Build Vite
+        run: npm run build
