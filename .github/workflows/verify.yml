@@ -13,13 +13,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Instalar dependências (regerar lockfile desta etapa)
-        run: npm install --no-audit --no-fund
-      - name: Capturar lockfile atualizado para versionamento
-        run: |
-          echo 'RFBS_LOCKFILE_START'
-          base64 -w 76 package-lock.json
-          echo 'RFBS_LOCKFILE_END'
+      - name: Instalar dependências fixadas
+        run: npm ci --no-audit --no-fund
       - name: TypeScript
         run: npm run typecheck
       - name: Vitest
