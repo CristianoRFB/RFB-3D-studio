@@ -15,13 +15,14 @@
   "real_messages": false,
   "real_payments": false,
   "production": false,
-  "unit_tests": "WRITTEN_NOT_RUN",
-  "typecheck": "NOT_RUN",
-  "build": "NOT_RUN",
+  "unit_tests": "PASS_CI_77856b1",
+  "typecheck": "PASS_CI_77856b1",
+  "build": "PASS_CI_77856b1",
   "browser_qa": "NOT_RUN",
-  "ci": "WORKFLOW_ADDED_NOT_VERIFIED",
+  "ci": "PASS_ON_77856b1",
   "source_png_assets": "NOT_IMPORTED",
   "monthly_recurring_cost_added_brl": 0,
   "requirements_trace": "docs/PROGRESS.md",
-  "next_action": "Inspect CI on PR #1; install dependencies and commit lockfile, execute browser QA before treating viewer as tested."
+  "next_action": "Version package-lock.json and execute Playwright browser QA with WebGL on/off; do not merge while browser QA is NOT_RUN.",
+  "ci_run_url": "https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45091528752"
 }

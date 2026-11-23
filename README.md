@@ -1,21 +1,16 @@
-# RFBStudio — RFB Labs
+# RFB Studio — RFB Method
 
-> **Em planejamento.** G0 documentado, scaffold G1 em preparação. Não há aplicação funcional, backend, clientes, pagamentos, produção nem QA de navegador.
+> **G2 demonstrativo em branch Draft.** Um visualizador procedural 3D foi implementado e **compila em CI**, mas ainda não recebeu homologação em navegador/WebGL real. Nada foi publicado em produção.
 
-Personalização visual de produtos 3D e orçamento conceitual, sem compra.
+Personalização visual de produtos 3D. Slogan: **Escolha, visualize e transforme**.
 
-## Starter Pack importado
+## O que há nesta revisão
+- Viewer WebGL original com Three.js + React Three Fiber v9: garrafa de demonstração autoral.
+- Quatro cores, dois materiais, orbit/pan/zoom por ponteiro e teclado, qualidade reduzida e fallback 2D SVG.
+- Configuração demonstrativa guardada em `localStorage`, sem servidor/conta. O roteiro original G1 continua acessível.
+- **Não implementado:** preço dinâmico, orçamento, carrinho, autenticação, Firebase, persistência remota, envio, pagamentos ou deploy.
 
-- [Especificação RFB](docs/ESPECIFICACAO-RFB.txt)
-- [Starter Pack](docs/STARTER-PACK.md)
-- [Diagramas](docs/DIAGRAMAS.md) — 7 Mermaid editáveis
-- [UX e catálogo](docs/UX-DESIGN-AND-QA.md) — 58 telas previstas, não implementadas
-- [Roadmap](docs/ROADMAP.md) — G0 a G6
-- [Proveniência](docs/PROVENIENCIA.md) e [estado](PROJECT_STATUS.json)
-
-A primeira interface React/Vite é **ilustrativa**, com dados sintéticos e controle de etapas local. Não realiza operações reais do negócio.
-
-### Rodar no computador (não executado nesta importação)
+## Rodar localmente
 
 ```sh
 npm install
@@ -25,6 +20,12 @@ npm run build
 npm run dev
 ```
 
-A meta de infraestrutura é R$0/mês adicional; pagamentos, IA, mídia, mapas e terceiros podem ter custos externos. 
+**CI:** [GitHub Actions](https://github.com/CristianoRFB/RFB-3D-studio/actions). Na revisão de código `77856b1`, instalação, typecheck, testes e build passaram no workflow [45091528752](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45091528752). Browser/WebGL E2E: **NOT_RUN**. Gerar e versionar o lockfile permanece pendente.
 
-**Fonte controlada:** RFB Method, PR #4, pasta `06-rfbstudio`. O método é privado; não depender dele para links de produto público.
+## Documentos do Starter Pack
+- [Especificação original](docs/ESPECIFICACAO-RFB.txt)
+- [Starter Pack](docs/STARTER-PACK.md), [Diagramas](docs/DIAGRAMAS.md) e [UX — catálogo de 58 telas](docs/UX-DESIGN-AND-QA.md)
+- [Roadmap](docs/ROADMAP.md), [Proveniência](docs/PROVENIENCIA.md), [Status](PROJECT_STATUS.json)
+- [Progresso e evidências](docs/PROGRESS.md), [Handoff](docs/HANDOFF.md) e [Licenças de assets](docs/ASSETS-LICENSES.md)
+
+**Infra:** objetivo de custo recorrente adicional R$0, condicionado a limites verificados. Nenhum Firebase, Cloudflare, billing ou serviço de produção foi ativado.

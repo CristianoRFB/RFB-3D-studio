@@ -16,3 +16,10 @@ Trocar o roteiro estático G1 por um configurador visual com modelo original pro
 5. NÃO mesclar PR nem publicar em produção até gates comprovados.
 
 **Riscos:** AV-01, AV-02, AV-09, AV-12, AV-16; gates de QA abertos. Assets e licenças em docs/ASSETS-LICENSES.md. Checkpoint de commit SHA final deve ser conferido no GitHub.
+
+## Checkpoint S002 — evidência CI
+
+- Commit de implementação: [77856b1](https://github.com/CristianoRFB/RFB-3D-studio/commit/77856b1f6c41a6a1465b9a9ec53f31d410c58219) na branch do PR #1, sem merge.
+- GitHub Actions [run 45091528752](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45091528752): instalação PASS; Typecheck PASS; Vitest PASS; Build PASS.
+- **NOT_RUN:** Playwright, screenshot real, WebGL on/off, verificação em mobile. Lockfile não versionado.
+- Alterações documentais posteriores exigem nova confirmação do HEAD/CI.
