@@ -9,7 +9,7 @@
 - [x] Preservar especificação original textual e nome/numeração do projeto.
 - [x] Inventariar 10 módulos, 12 features, entidades, 58 telas e jornada; 7 diagramas editáveis iniciais.
 - [x] Relacionar riscos técnicos/custos à fonte original.
-- [ ] Ler e comparar **3–5 produtos/soluções reais do mesmo nicho**; anotar URL/data, forças de UX, oportunidade e riscos. Não copiar mídia/código/marca de terceiros.
+- [x] Comparar **4 produtos reais** (Zakeke, Threekit, Kickflip, Expivi): UX, riscos, fontes oficiais e decisões em [RESEARCH-CONFIGURATORS.md](RESEARCH-CONFIGURATORS.md), consultado em 23/11/2026; sem copiar mídia/código.
 - [ ] Validar público, diferenciais e critérios de MVP, inclusive experiência mobile.
 - [ ] Importar PNGs conceituais do ZIP no repo individual e conferir SHA antes de declarar assets versionados.
 - [ ] Aprovar arquitectura, permissões, modelo de dados e requisitos aplicáveis ao MVP.

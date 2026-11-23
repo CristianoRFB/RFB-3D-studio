@@ -1,5 +1,7 @@
 # RFBStudio — UX, identidade e catálogo completo de telas
 
+> Pesquisa visual externa (23/11/2026): [RESEARCH-CONFIGURATORS.md](RESEARCH-CONFIGURATORS.md) — 4 soluções reais, decisões de UX e links oficiais. Não foram importados screenshots ou assets alheios.
+
 > **ATUALIZAÇÃO G3:** status `UI_DEMO` indica cobertura funcional dentro de componentes compartilhados, **não** página separada, aplicação homologada ou integração com backend. `LOCAL_DEMO` indica `localStorage`. `GLB_PREVIEW_ONLY` não cadastra produtos nem torna preços vinculantes. T-IDs não implementados permanecem pendentes. QA de viewport específico e validação de licença continuam em aberto.
 
 > **BASE DO USUÁRIO:** os 58 T-IDs abaixo são os planejados na fonte original, NÃO telas programadas. Os 10 PNGs de conceito existentes no ZIP são artes demonstrativas, NÃO prints do produto executando. **Este repositório público recebe o catálogo textual, mas os PNGs do ZIP original ainda não foram importados nem revisados quanto à marca e licença.**
