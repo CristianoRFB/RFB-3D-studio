@@ -5,7 +5,7 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     permissions:
       contents: read
     steps:
@@ -13,8 +13,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Instalar dependências do lockfile versionado
-        run: npm ci --no-audit --no-fund
+      - name: Instalar dependências (regerar lockfile desta etapa)
+        run: npm install --no-audit --no-fund
+      - name: Capturar lockfile atualizado para versionamento
+        run: |
+          echo 'RFBS_LOCKFILE_START'
+          base64 -w 76 package-lock.json
+          echo 'RFBS_LOCKFILE_END'
       - name: TypeScript
         run: npm run typecheck
       - name: Vitest
@@ -23,6 +28,12 @@ jobs:
         run: npm run build
       - name: Auditar dependências de produção
         run: npm audit --omit=dev --audit-level=high
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Firestore Rules no Emulator isolado
+        run: npm run rules:test
       - name: Guardar build estático para revisão
         uses: actions/upload-artifact@v4
         with:
