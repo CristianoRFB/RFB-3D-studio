@@ -63,3 +63,30 @@ test('desktop, catálogo, busca e exportação seguros', async ({ page }) => {
   await page.getByRole('button', { name: 'Exportar configuração JSON' }).click();
   expect((await event).suggestedFilename()).toBe('rfb-studio-design.json');
 });
+
+
+test('presets, qualidade reduzida e importação GLB local sem autorização comercial', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Seções do estúdio' }).getByRole('button', { name: 'Presets' }).click();
+  await expect(page.getByRole('heading', { name: 'Aura Metal' })).toBeVisible();
+  await page.getByRole('button', { name: 'Usar este preset' }).nth(1).click();
+  await expect(page.getByRole('heading', { name: 'Garrafa Aura' })).toBeVisible();
+  await page.getByRole('checkbox', { name: 'Qualidade reduzida' }).check();
+  await page.getByRole('group', { name: /Visualizador/ }).focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('+');
+
+  const encoder = new TextEncoder();
+  const json = encoder.encode(JSON.stringify({ asset: { version: '2.0' }, meshes: [{ primitives: [] }] }));
+  const pad = Math.ceil(json.length / 4) * 4;
+  const bytes = Buffer.alloc(20 + pad, 32);
+  bytes.writeUInt32LE(0x46546c67, 0); bytes.writeUInt32LE(2, 4);
+  bytes.writeUInt32LE(bytes.length, 8); bytes.writeUInt32LE(pad, 12);
+  bytes.writeUInt32LE(0x4e4f534a, 16);
+  Buffer.from(json).copy(bytes, 20);
+  await page.getByLabel('Arquivo GLB local').setInputFiles({ name: 'original-demo.glb', mimeType: 'model/gltf-binary', buffer: bytes });
+  await expect(page.getByText(/GLB carregado localmente/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Adicionar ao carrinho demo' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Remover GLB local' }).click();
+  await expect(page.getByRole('button', { name: 'Adicionar ao carrinho demo' })).toBeEnabled();
+});
