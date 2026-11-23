@@ -6,7 +6,8 @@ import { clamp, COLORS, type StudioConfig } from './studio';
 type Rot = { x: number; y: number };
 type Pan = { x: number; y: number };
 type Drag = { x: number; y: number; pan: boolean };
-type Props = { config: StudioConfig; productId: ProductId; sizeScale: number };
+type DisplayConfig = Pick<StudioConfig, 'colorId' | 'finishId'>;
+type Props = { config: DisplayConfig; productId: ProductId; sizeScale: number };
 const DEFAULT_ROT = { x: 0.14, y: -0.35 };
 
 function supportsWebGL(): boolean {
@@ -58,7 +59,7 @@ class ViewerBoundary extends Component<{ fallback: ReactNode; children: ReactNod
   static getDerivedStateFromError(): { failed: boolean } { return { failed: true }; }
   render() { return this.state.failed ? this.props.fallback : this.props.children; }
 }
-export function Preview2D({ productId, colorId }: { productId: ProductId; colorId: StudioConfig['colorId'] }) {
+export function Preview2D({ productId, colorId }: { productId: ProductId; colorId: DisplayConfig['colorId'] }) {
   const fill = COLORS.find(c => c.id === colorId)?.hex ?? COLORS[0].hex;
   return <svg className="product-svg" viewBox="0 0 280 330" role="img" aria-label={'Ilustração 2D: ' + getProduct(productId).name}>
     <ellipse cx="140" cy="301" rx="78" ry="11" fill="#080e1d" opacity=".45" />
