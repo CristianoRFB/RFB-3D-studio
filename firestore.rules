@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Prepared for a FUTURE isolated Firebase project. Never deployed by this PR.
+    function isSelf(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function validDesignDocument(uid) {
+      return request.resource.data.keys().hasOnly(['ownerUid', 'title', 'config', 'updatedAt', 'createdAt', 'schemaVersion'])
+        && request.resource.data.ownerUid == uid
+        && request.resource.data.schemaVersion == 2
+        && request.resource.data.title is string
+        && request.resource.data.title.size() <= 60
+        && request.resource.data.config is map
+        && request.resource.data.config.keys().hasOnly(['version', 'productId', 'colorId', 'finishId', 'sizeId', 'addonId', 'quantity'])
+        && request.resource.data.config.version == 2
+        && request.resource.data.config.productId in ['aura', 'orbita', 'nexo']
+        && request.resource.data.config.colorId in ['lilas', 'azul', 'coral', 'grafite']
+        && request.resource.data.config.finishId in ['fosco', 'metalico']
+        && request.resource.data.config.sizeId in ['p', 'm', 'g']
+        && request.resource.data.config.quantity is int
+        && request.resource.data.config.quantity >= 1
+        && request.resource.data.config.quantity <= 10
+        && request.resource.data.config.addonId in ['nenhum', 'alca', 'base', 'suporte', 'gravacao'];
+    }
+    match /users/{uid}/designs/{id} {
+      allow get, list: if isSelf(uid);
+      allow create: if isSelf(uid) && validDesignDocument(uid);
+      allow update: if isSelf(uid) && resource.data.ownerUid == uid && validDesignDocument(uid)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isSelf(uid) && resource.data.ownerUid == uid;
+    }
+    match /users/{uid}/quotes/{id} {
+      allow get, list: if isSelf(uid);
+      // Quotes and totals are server-controlled, never client-writable.
+      allow create, update, delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
