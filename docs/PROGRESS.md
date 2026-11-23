@@ -23,3 +23,15 @@
 1. Validar CI no HEAD atual; corrigir erros por log sem testar cegamente.
 2. Conferir `npm ci` e repetir suíte completa no HEAD após versionar lockfile.
 3. Testes Firebase Auth/Rules em emuladores isolados, modelo RBAC/tenancy real e API de preços autenticada. Homologação Cloudflare isolada só após autorização e conferência de custo.
+
+## Checkpoint adicional — código ced525f4 / QA GitHub #45095093014
+
+**GitHub Actions [45095093014](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45095093014) = PASS**, commit `ced525f4a3d6e2104c2f15f6f1583c17608ad1a7`:
+- `npm ci` com `package-lock.json` versionado: PASS.
+- `npm run typecheck`, incluindo `server/`: PASS.
+- `npm run test` (Vitest para domínio, importador GLB real e Worker de demonstração): PASS.
+- `npm run build` Vite: PASS. Build compilado publicado como artefato temporário do Actions, **não deploy**.
+- `npm audit --omit=dev --audit-level=high`: PASS no momento da execução; não é garantia contra todos os CVEs.
+- `npm run e2e`: PASS em Chromium, cobrindo personalização, preset, importação GLB de triângulo original, carrinho, orçamento, reload, fallback e viewports 320/360/390/430/768/1024/1440. Capturas reais no artefato `rfb-studio-browser-qa`.
+
+**Ainda NOT_RUN/NOT_HOMOLOGADO:** Firestore Auth/Rules Emulator; permissões admin/vendedor, dois usuários reais; deploy Cloudflare; WebGL em GPU/dispositivos físicos, perf profiling; produção, pagamentos e notificações. Issues #2–#4 abertas e PR Draft.

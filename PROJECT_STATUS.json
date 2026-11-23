@@ -15,16 +15,16 @@
   "real_messages": false,
   "real_payments": false,
   "production": false,
-  "unit_tests": "PASS_ON_PREVIOUS_SHA_RECHECK_HEAD",
-  "typecheck": "PASS_ON_PREVIOUS_SHA_RECHECK_HEAD",
-  "build": "PASS_ON_PREVIOUS_SHA_RECHECK_HEAD",
-  "browser_qa": "PASS_ON_PREVIOUS_SHA_RECHECK_HEAD",
-  "ci": "PASS_ON_PREVIOUS_SHA_RECHECK_HEAD",
+  "unit_tests": "PASS_GITHUB_ACTIONS_45095093014",
+  "typecheck": "PASS_GITHUB_ACTIONS_45095093014",
+  "build": "PASS_GITHUB_ACTIONS_45095093014",
+  "browser_qa": "CHROMIUM_E2E_PASS_HARDWARE_AND_AUTH_NOT_TESTED",
+  "ci": "PASS_GITHUB_ACTIONS_45095093014",
   "source_png_assets": "NOT_IMPORTED",
   "monthly_recurring_cost_added_brl": 0,
   "requirements_trace": "docs/PROGRESS.md",
-  "next_action": "Confirm npm ci, TypeScript, Vitest, Chromium E2E on HEAD; Firebase Rules/Auth and production infrastructure still blocked.",
-  "ci_run_url": "https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45091528752",
+  "next_action": "Production blockers: connect isolated Firebase Auth/Firestore with A/B Rules emulator tests and true server price authority. Request specific isolated Cloudflare preview authorization; no deploy or merge yet.",
+  "ci_run_url": "https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45095093014",
   "catalog_3_models": "IMPLEMENTED_BROWSER_QA_PARTIAL",
   "preset_gallery": "IMPLEMENTED_UNIT_TESTED",
   "size_variants": "IMPLEMENTED_UNIT_AND_E2E",
@@ -44,5 +44,6 @@
     3,
     4
   ],
-  "lockfile": "VERSIONED_PENDING_NPM_CI_CI_HEAD"
+  "lockfile": "VERSIONED_NPM_CI_PASS",
+  "verified_code_sha": "ced525f4a3d6e2104c2f15f6f1583c17608ad1a7"
 }

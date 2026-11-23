@@ -22,3 +22,8 @@
 5. Manter `PROJECT_STATUS.json` e `docs/PROGRESS.md` como checkpoints; preservar PR Draft até gates completos.
 
 **Status honesto:** `INTERACTIVE_LOCAL_DEMO`, **não 90% de produção**. Cobertura funcional demonstrativa e 58 T-IDs detalhados em `docs/METHOD-COVERAGE.md`.
+
+## Código verificado no ciclo
+- SHA `ced525f4a3d6e2104c2f15f6f1583c17608ad1a7`, run [45095093014](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45095093014) PASS npm ci, TypeScript server, Vitest, Vite, auditoria npm e Chromium E2E.
+- O commit deste checkpoint documental deve ser conferido novamente como HEAD no PR; não confundir CI do SHA de código com novo HEAD.
+- O escopo prioritário restante é **backend de produção/autenticação/persistência por owner** (Issues #2 e #3), depois WebGL GPU/QA Cloudflare preview (Issue #4). Não rotular progresso de 90% sem critérios homologados.
