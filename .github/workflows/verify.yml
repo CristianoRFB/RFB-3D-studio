@@ -2,12 +2,10 @@ name: RFB Studio - verificar branch
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [feature/rfb-starter-pack-v1]
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     permissions:
       contents: read
     steps:
@@ -15,11 +13,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Instalar dependencias (lockfile ainda pendente)
+      - name: Instalar dependências (lockfile pendente)
         run: npm install --no-audit --no-fund
-      - name: Verificar tipos
+      - name: TypeScript
         run: npm run typecheck
-      - name: Testes unitarios
+      - name: Vitest
         run: npm run test
       - name: Build Vite
         run: npm run build
+      - name: Instalar Chromium para QA E2E
+        run: npx playwright install --with-deps chromium
+      - name: QA E2E navegador real
+        run: npm run e2e
+      - name: Publicar capturas de QA sem dados pessoais
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rfb-studio-browser-qa
+          path: |
+            artifacts/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
