@@ -1,29 +1,28 @@
-# RFB Studio — handoff autônomo
+# RFB Studio — handoff verificável 23/11/2026
 
-**Data:** 22/11/2026 (America/Sao_Paulo). **Repo:** CristianoRFB/RFB-3D-studio. **PR:** #1 Draft na branch `feature/rfb-starter-pack-v1`. **HEAD de início desta rodada:** f43ab3287fbbf239ded1e9648428cc01549ef6cd. Conferir sempre HEAD real antes de escrever.
+**ÚNICO repositório-alvo:** `CristianoRFB/RFB-3D-studio`; **PR:** #1 Draft para `main`; branch `feature/rfb-starter-pack-v1`. Não editar método-mãe `rfb-method-gpt` nem outros produtos.
 
-## O que foi escrito
-- S003: catálogo de 3 produtos, preços sintéticos em centavos, compatibilidade e testes adversariais.
-- S004: 6 presets, designs locais, carrinho, orçamento JSON, export SVG, links por configuração.
-- S005: endpoint Workers `/api/demo-quote` stateless, validação estrita, sem deploy; Firestore Rules proposta (não testada), threat model e matriz de papéis.
-- S006: prévia GLB local limitada e não comercial, fallback, mobile, modos de qualidade.
-- CI: Vitest unitário, Build/TypeScript e Playwright Chromium + capturas sem dados pessoais; ver `docs/PROGRESS.md` para última execução.
+## Linha do tempo deste ciclo
+- Base anterior: `957071d56bdeec1c08a747b29fe6eaaa0df558bd`, G3 demo, E2E Chromium.
+- G4 Auth: Firebase Auth real quando configurado, Firestore por UID/revisionamento, 2 contas no Emulator, regras e 40 verificações de segurança.
+- API: JWT Firebase verificado pelo Worker, precificação server-side sintética, request UUID idempotente, rate limiter obrigatório e OAuth server-only de service account; `ENABLE_DEMO_QUOTE_PERSISTENCE` desabilitada por padrão.
+- RBAC: designer/vendedor/admin via custom claims de servidor; metadata de modelos em `/tenants/{tenantId}/models`, tenant e owner verificados em Rules. Sem upload de GLB para Cloud Storage.
+- 3D: 3 geometrias autorais, acessórios visuais, export screenshot PNG, SVG 2D e fallback, controles teclado/touch/zoom.
+- Produto e privacidade: presets, carrinho/quote local, designs, backup/restore/clear local, offline; pesquisa das 4 soluções oficiais.
+- QA: [build 35f822ca](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45179480137) PASS 24 unit, 40 rules, 7+2+1 Playwright; bundles 340/516,7 KiB gzip.
 
-## Integridade e não-escopo
-- Nenhuma edição na metodologia-mãe ou outros produtos. Cloudflare consultada apenas em leitura; nenhum Worker/Pages criado, apagado, publicado ou modificado.
-- Firebase não conectado. Nenhum usuário real, produto real, orçamento vinculante, pagamento ou notificação foi usado.
-- Design original do usuário preservado em especificação/UX; fotos/PNGs conceituais originais continuam fora do repo por auditoria de licença.
+## Estado e limites
+- NÃO há Firebase configurado/implantado para este app, nem credenciais/claims reais, nem preview Cloudflare.
+- Nenhum Worker novo, Pages novo, domínio, banco Firebase, plano pago, billing, pagamento, entrega de mensagem ou produto real foi criado/ativado nesta rodada.
+- O código é uma demonstração com emuladores; builds/screenshots de CI não são URL pública. Não tomar decisões de negócio com preços fictícios.
+- Assets e PNGs conceituais originais continuam fora do repositório enquanto licença/autoria não forem checadas.
+- A `main` e ambientes existentes foram preservados.
 
-## Continuar sem recuperar o chat
-1. Revisar `git HEAD`, Issues #2–#4, PR #1, reviews e checks; resolver falhas do CI no HEAD, não copiar status de SHA anterior.
-2. Validar lockfile agora versionado com `npm ci`, TypeScript, Vitest e Playwright WebGL on/off, testes de GLB real.
-3. Para feature real: configurar Auth e Firestore só em projeto Spark autorizado e isolado; escrever testes Rules A/B/admin antes de habilitar sincronização. Validar pricing e server authority.
-4. Para release: avaliar Cloudflare Workers Static Assets Free e preview não produtivo com custos/rollback; não executar deploy antes de aprovação adequada.
-5. Manter `PROJECT_STATUS.json` e `docs/PROGRESS.md` como checkpoints; preservar PR Draft até gates completos.
+## Continuar (RFB Method rfb:continue)
+1. Reabrir `AGENTS.md`, `PROJECT_STATUS.json`, `docs/PROGRESS.md`, `docs/METHOD-COVERAGE.md`; verificar HEAD do PR, CI, Issues #2–#4 e revisões.
+2. Rodar `npm ci`, `npm run typecheck`, `npm run test`, `npm run build`, `npm run perf:budget`, `npm run rules:test` e Playwright. A cada SHA, atualizar evidências.
+3. Após autorização de um projeto Firebase Spark dedicado, habilitar Authentication e Firestore sem tocar em outros projetos; validar email/password, ownership, backup e deleção; aplicar Rules em staging. Administradores/Designers exigem custom claims atribuídas por servidor confiável.
+4. Para API autenticada, configurar serviço Worker em preview isolado com Firebase JWKS, server OAuth, rate limit binding, logs/rollback, integração real contra banco de teste; manter cobrança e mensagens desligadas.
+5. QA em hardware real, perf/segurança/a11y, licenças e revisão independente. Só liberar PR Draft, merge e publicação quando todos gates passarem e houver autorização.
 
-**Status honesto:** `INTERACTIVE_LOCAL_DEMO`, **não 90% de produção**. Cobertura funcional demonstrativa e 58 T-IDs detalhados em `docs/METHOD-COVERAGE.md`.
-
-## Código verificado no ciclo
-- SHA `ced525f4a3d6e2104c2f15f6f1583c17608ad1a7`, run [45095093014](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45095093014) PASS npm ci, TypeScript server, Vitest, Vite, auditoria npm e Chromium E2E.
-- O commit deste checkpoint documental deve ser conferido novamente como HEAD no PR; não confundir CI do SHA de código com novo HEAD.
-- O escopo prioritário restante é **backend de produção/autenticação/persistência por owner** (Issues #2 e #3), depois WebGL GPU/QA Cloudflare preview (Issue #4). Não rotular progresso de 90% sem critérios homologados.
+**Próximo bloqueio concreto:** configuração/provisionamento externo Firebase+Cloudflare; nenhuma ferramenta de engenharia local substitui credenciais, conta e política de custo. Não prometer entrega assíncrona.

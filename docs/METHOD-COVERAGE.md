@@ -1,37 +1,36 @@
-# Cobertura RFB Method — RFB Studio
+# RFB Method — 12 critérios de aceite do RFB Studio
 
-**Interpretação:** `CODE` = existe implementação; `UNIT` = teste unitário passou em CI anterior; `E2E` = Playwright comprovou parte do fluxo; `NOT_VERIFIED` = nenhuma homologação. Isto mede uma demonstração, **não porcentagem de sistema pronto para produção**. Cada AC exige frontend, persistência real, segurança e UX para ser homologado.
+**Legenda:** `C` código; `U` teste unitário; `E` Playwright Chromium; `R` Firestore/Auth Emulator; `B` bloqueio comercial/produção. Exigir validação no ambiente real antes de `ACCEPTED`.
 
-| AC | Feature | Implementação demonstrativa | Evidência disponível | Lacuna para aceite integral |
-|---|---|---|---|---|
-| AC-01 | Visualização 3D | Three/R3F com 3 geometrias procedurais | CODE, Browser CI parcial | GPU/WebGL real validada visualmente e licenças reais |
-| AC-02 | Orbit/pan/zoom | Mouse, touch, teclado | CODE, E2E acionamento parcial | Testes detalhados de navegação e dispositivos |
-| AC-03 | Troca de materiais | 4 cores, fosco/metálico | CODE, UNIT, E2E seleção | Modelos reais/QA PBR |
-| AC-04 | Variações de tamanho | 3 opções por produto | CODE, UNIT, E2E seleção | Modelo físico real, compatibilidade homologada |
-| AC-05 | Atualização de preço | Calculadora em centavos por catálogo versionado | UNIT, E2E; Worker demo testado | Autoridade de preço do backend de produção |
-| AC-06 | Salvar configuração | localStorage com esquema e reload | UNIT, E2E | Firebase Auth/Firestore, ownership e sincronização |
-| AC-07 | Exportar visualização | SVG 2D original, JSON de config | CODE, E2E JSON | Captura real 3D e licenças/export fidelity |
-| AC-08 | Galeria de presets | 6 presets originais, galeria editável | UNIT, E2E em revisão | Persistência multiusuário e curadoria de catálogo |
-| AC-09 | Orçamento por configuração | Histórico local, versão de tabela, Worker demo | UNIT, E2E local | API autenticada e vinculante, idempotência |
-| AC-10 | Qualidade reduzida | DPR reduzido e antialias off | CODE, E2E checkbox em revisão | Medições reais de memória/performance |
-| AC-11 | Fallback 2D | SVG e WebGL check | E2E WebGL desativado | Testar perda de contexto e aparelhos físicos |
-| AC-12 | Painel de modelos | 3 modelos locais + GLB até 8 MB apenas visual | UNIT, E2E em revisão | CRUD autenticado de modelos/licenças, armazenamento |
+| AC | Requisito original | Evidência de demo | Falta para aceite integral |
+|---|---|---|---|
+| 01 | Visualização 3D | C/E SwiftShader com 3 modelos originais | GPU real, licenças, móveis físicos |
+| 02 | Orbit/pan/zoom acessíveis | C/E câmera por teclado e ponteiro | Cobertura completa de gestos e leitor de tela |
+| 03 | Troca de materiais | C/U/E cores, acabamentos, opções visuais | Materiais e produção reais |
+| 04 | Variações de tamanho | C/U/E escala 3D e preço em centavos | Dimensões, conformidade e produção física reais |
+| 05 | Atualização de preço | C/U/E catálogo local e Worker demo | Autoridade comercial e sincronização de catálogo real |
+| 06 | Salvar configuração | C/U/E local, R Auth/Firestore 2 contas | Firebase de projeto real, retention e restore |
+| 07 | Exportar visualização | C/E PNG WebGL, SVG 2D + acessório, JSON | Perf e fidelidade em dispositivos/GLB reais |
+| 08 | Galeria de presets | C/U/E 6 modelos/presets | Curadoria, gestão, ativos reais |
+| 09 | Orçamento por configuração | C/U/E demo local, quote JWT/uuid mock unit | Integração real Worker/Firestore, rate, claims, envio aprovado |
+| 10 | Modo qualidade reduzida | C/E DPR/antialias e motion | Medidas de FPS e memória mobile |
+| 11 | Fallback 2D | C/E WebGL off e SVG | Simulação de perda de contexto e hardware |
+| 12 | Painel de modelos | C/R papéis/tenant e CRUD metadata 3 modelos; C/E GLB local | Atribuição de claims real, upload licenciado, gestão/admin em produção |
 
-## Módulos originais
-| Módulo | Cobertura demonstrativa | Falta para produção |
-|---|---|---|
-| Catálogo 3D | 3 produtos, pesquisa, escolha | CRUD confiável |
-| Visualizador | R3F, 2D, controles | QA GPU/devices |
-| Materiais e cores | Paletas e acabamentos | Assets reais |
-| Opções e variantes | Tamanhos e acessórios | Regras comerciais aprovadas |
-| Preço dinâmico | Cotação sintética | Backend e catálogo autorizado |
-| Salvar design | localStorage com versão | Auth e Firestore |
-| Orçamento | Simulação local/JSON | Estado e envio autenticado |
-| Carrinho | Itens locais e totais | Checkout/pedidos reais |
-| Biblioteca de modelos | 3 padrões, importador local GLB | Gestão de licenças e storage |
-| Painel de vendas | Métricas locais e aviso | Vendedor, permissão, tenant, dados reais |
+## 10 módulos da especificação
+1. Catálogo 3D: seleção/busca de 3 produtos sintéticos.
+2. Visualizador: Three.js, R3F, 2D, PNG, câmera.
+3. Materiais e cores: 4 cores, acabamentos.
+4. Opções e variantes: tamanhos/acessórios representados visualmente.
+5. Preço dinâmico: cálculo demonstrativo versionado, API server-cotação desativada.
+6. Salvar design: local e Firebase Emulator por UID/revisionamento.
+7. Orçamento: simulações e API privada autenticada somente em código/mocks.
+8. Carrinho: composição local, valores não vinculantes, histórico.
+9. Biblioteca de modelos: 3 procedurais, importação GLB local, metadados RBAC por tenant.
+10. Painel de vendas: métricas **locais**, sem fingir vendedor administrativo em produção.
 
-**Telas T001–T058:** catálogo íntegro em `UX-DESIGN-AND-QA.md`. Um componente pode cobrir um fluxo ou estado, não implica 58 telas implementadas. `UI_DEMO` e `LOCAL_DEMO` não são `HOMOLOGADO`.
+## 58 T-IDs e metas
+O catálogo completo de 58 telas está em [UX-DESIGN-AND-QA.md](UX-DESIGN-AND-QA.md). Uma tela conceitual pode ser atendida por componente reutilizável; `UI_DEMO`, `EMULATOR`, `CODE_ONLY` **não** equivalem a serviço comercial entregue. Os 12 critérios têm **código demonstrativo parcial ou completo**, mas nenhum deve ser anunciado `ACCEPTED_IN_PRODUCTION` sem os gates críticos. Não calcular porcentagem de conclusão a partir de arquivos ou número de componentes.
 
-## Critérios para alegar 90%
-Somente quando pelo menos 90% dos critérios obrigatórios de aceite estiverem **HOMOLOGADOS por evidência real** e os gates críticos de autenticação, dados, custos, segurança e produção forem atendidos. A demo atual não passa essa regra.
+### Gates de 90% e full
+Antes de declarar pelo menos 90% ou 100%, exigir aceites funcionais E2E e RBAC em ambiente isolado real, catálogos e preços aprovados, QA físico/perf/a11y, confidencialidade LGPD, verificação de custo, deployment/rollback, revisão independente e aprovação final. O estado atual não satisfaz essa condição.

@@ -1,39 +1,45 @@
-# RFB Studio — RFB Method
+# RFB Studio — configurador 3D | RFB Method
 
-> **Estado:** G3, demonstração funcional em desenvolvimento, testada em Chromium CI. **Não é serviço comercial pronto**; sem Firebase/Cloudflare ativo, contas reais, pagamentos ou pedidos enviados. PR #1 permanece Draft.
+**Estado verificado em 23/11/2026:** aplicação demonstrativa G4 implementada e testada no Chromium, WebGL via SwiftShader e Firebase Emulator. **Não há deploy Cloudflare/Firebase real e não se trata de sistema comercial homologado.** Desenvolvimento em [PR #1 Draft](https://github.com/CristianoRFB/RFB-3D-studio/pull/1), sem merge na `main`.
 
-**Escolha, visualize e transforme.** Configurador de produtos 3D com React 19, TypeScript, Vite, Three.js e React Three Fiber.
+> **Escolha, visualize e transforme.** Configurador visual de produtos 3D usando React 19, TypeScript, Vite, Three.js, React Three Fiber e integrações Firebase opcionais.
 
-## Funcionalidades da demonstração
+## O que funciona no código e no ambiente de testes
 
-- 3 modelos procedurais originais: Garrafa Aura, Luminária Órbita e Vaso Nexo; renderização WebGL, modo reduzido e fallback 2D.
-- Controles orbit/pan/zoom por mouse, touch e teclado; 4 cores, acabamentos, tamanho, acessórios e quantidades.
-- Preços de demonstração calculados de um catálogo versionado em centavos, com regras de compatibilidade.
-- 6 presets, pesquisa no catálogo, designs salvos localmente, carrinho e orçamentos simulados.
-- Exportar config JSON, prévia 2D SVG e link de configuração sem dados pessoais.
-- Prévia de GLB local com validação de formato/tamanho/referências externas; **não** pode ser salva, precificada nem enviada para venda.
-- Painel com métricas apenas do armazenamento local; sem simulação enganosa de login administrativo.
-- Endpoint computacional `server/worker.ts` para cotação DEMO: ainda não publicado, com testes negativos.
+- **Render 3D:** Garrafa Aura, Luminária Órbita e Vaso Nexo — geometria procedural original; rotação, zoom, pan, acabamento e tamanho, com acessórios visuais efetivos.
+- **Fallback/acessibilidade:** prévia 2D com acessórios, modo qualidade reduzida, teclado, `prefers-reduced-motion` e WebGL no Chromium/SwiftShader.
+- **Catálogo:** busca, 4 cores, acabamentos, 3 tamanhos, acessórios, quantidades 1–10, 6 presets e regras de compatibilidade/preço em centavos.
+- **Designs e orçamento locais:** edição, salvar/retomar, carrinho, simulações, métricas locais, links de configuração, export JSON, SVG e screenshot PNG 3D.
+- **Privacidade:** backup local JSON, restauração com validação, exclusão confirmada e aviso de offline.
+- **Importação GLB local:** até 8 MB; glTF 2.0 com validação de geometria e referências internas; nenhuma mídia é enviada ou precificada automaticamente.
+- **Firebase opcional:** cadastro/login/logout/recuperação de acesso e CRUD de designs por UID com revisão; verificados com Authentication e Firestore Emulator e duas contas sintéticas.
+- **Modelos por tenant:** metadados de modelos originais, permissões de Designer/Vendedor/Admin atribuídas por custom claims, com negações de acesso entre usuários/tenants testadas em emuladores.
+- **Worker opcional:** `/api/demo-quote` stateless; `/api/private/quotes` autenticado, com rate limiting e idempotência, desligado por padrão até configurar infraestrutura de confiança. **Não há pagamentos ou mensagens reais.**
 
-## Executar (Node.js 22)
+## Ambiente de desenvolvimento
+
+Node.js 22, `npm ci` a partir de lockfile versionado e nenhum segredo incluído no GitHub:
 
 ```sh
 npm ci
 npm run typecheck
 npm run test
 npm run build
+npm run perf:budget
+npm run rules:test
 npx playwright install --with-deps chromium
 npm run e2e
 npm run dev
 ```
 
-**Lockfile:** `package-lock.json` versionado pelo CI; `npm ci` reproduz as dependências. Os gates devem ser reexecutados no HEAD atual.
+A execução de CI inclui também o modo WebGL e o teste Auth+Firestore em emuladores separados, com variáveis de ambiente **sintéticas**. Para configurar um projeto Firebase autorizado, começar em [`.env.example`](.env.example) e seguir [DEPLOY-PLAN.md](docs/DEPLOY-PLAN.md). O backend de quote requer segredos server-side e binding de Rate Limiting, nunca variáveis `VITE_*`.
 
-- [CI e relatórios](https://github.com/CristianoRFB/RFB-3D-studio/actions)
-- [PR #1 — desenvolvimento](https://github.com/CristianoRFB/RFB-3D-studio/pull/1)
-- [Roadmap](docs/ROADMAP.md) · [Progresso](docs/PROGRESS.md) · [Cobertura AC](docs/METHOD-COVERAGE.md) · [Handoff](docs/HANDOFF.md)
-- [Especificação original](docs/ESPECIFICACAO-RFB.txt) · [Starter Pack](docs/STARTER-PACK.md) · [Diagramas](docs/DIAGRAMAS.md)
-- [Catálogo UX de 58 T-IDs](docs/UX-DESIGN-AND-QA.md) · [Licença dos assets](docs/ASSETS-LICENSES.md)
-- [Segurança e backend](docs/BACKEND-SECURITY.md) · [Infraestrutura e custo](docs/INFRA-COSTS.md)
+## Evidência
 
-A aplicação usa apenas dados sintéticos; nenhuma forma de autorização, persistência remota, cotação vinculante, pagamento ou envio real foi integrada. O objetivo de custo recorrente é R$ 0, condicionado a franquias verificadas e aprovação de infraestrutura.
+- [CI do código 35f822ca: 24 testes unitários; 40 verificações Firestore; 7 E2E comuns, 2 WebGL e 1 Auth; `npm ci`, audit e build](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45179480137).
+- Orçamento de bundles verificado: **340 KiB gzip inicial / 516,7 KiB gzip total JS**. Não é um resultado Lighthouse ou medição de FPS.
+- [Progresso e critérios AC](docs/METHOD-COVERAGE.md) · [Handoff](docs/HANDOFF.md) · [Roadmap](docs/ROADMAP.md) · [Segurança](docs/BACKEND-SECURITY.md).
+- [Especificação original](docs/ESPECIFICACAO-RFB.txt) · [Starter Pack](docs/STARTER-PACK.md) · [Diagramas](docs/DIAGRAMAS.md) · [Arquitetura de implementação](docs/ARCHITECTURE-IMPLEMENTED.md).
+- [Pesquisa comparativa G0](docs/RESEARCH-CONFIGURATORS.md) · [58 telas e UX](docs/UX-DESIGN-AND-QA.md) · [Assets e licenças](docs/ASSETS-LICENSES.md) · [Infra/custo](docs/INFRA-COSTS.md).
+
+**Bloqueios atuais:** Firebase real/claims/credenciais, Worker + persistência testados no runtime Cloudflare, autorização e QA de preview isolado, acessibilidade/dispositivos físicos e validação comercial. [Issue #2](https://github.com/CristianoRFB/RFB-3D-studio/issues/2), [#3](https://github.com/CristianoRFB/RFB-3D-studio/issues/3) e [#4](https://github.com/CristianoRFB/RFB-3D-studio/issues/4) permanecem abertas. **Meta de R$0/mês adicional**, sujeita a quotas verificadas; nenhum billing foi ativado.

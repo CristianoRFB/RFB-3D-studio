@@ -1,5 +1,7 @@
 # Roadmap específico — RFBStudio (RFB Method)
 
+> **CHECKPOINT 23/11/2026:** G4 com Auth+Firestore e modelos/roles no Emulator, código de quote autenticado desabilitado, PNG WebGL, acessórios e privacidade locais, pesquisa G0 com quatro soluções. Código validado em [CI #45179480137](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45179480137). **Sem Firebase/Cloudflare live nem merge.** Este roadmap preserva checkboxes históricos da fase G0/G1 e não os trata como novo estado. Ver [PROGRESS.md](PROGRESS.md), [DEPLOY-PLAN.md](DEPLOY-PLAN.md) e [METHOD-COVERAGE.md](METHOD-COVERAGE.md).
+
 > **G3 — UPDATE 22/11/2026:** A aplicação demonstrativa agora cobre os 10 módulos como componentes de UI e as 12 features em diferentes níveis, não 58 telas individuais nem backend real. Ver [cobertura](METHOD-COVERAGE.md) e [progresso](PROGRESS.md). O checklist histórico abaixo é mantido como baseline e só pode ser fechado com teste correspondente. Sem deploy Firebase/Cloudflare.
 
 **Origem:** blueprint original do usuário (22/11/2026); **estado técnico:** `G0_DOCS_IMPORTED / APP_NOT_CREATED / QA_NOT_RUN`. Marcadores abaixo são gate de trabalho, **não aprovação implícita**. Este Starter Pack foi importado no repositório público `CristianoRFB/RFB-3D-studio` na branch `feature/rfb-starter-pack-v1`; projeto G1, sem software funcional.
