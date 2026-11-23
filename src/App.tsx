@@ -327,7 +327,7 @@ export default function App() {
       </section>}
       {cloudVisited && <div hidden={tab !== 'nuvem'}>
         <Suspense fallback={<section className="content-card" role="status">Preparando autenticação...</section>}>
-          <CloudWorkspace design={design} onLoad={config => {
+          <CloudWorkspace design={design} cart={workspace.cart} onLoad={config => {
             setDesign(normalizeDesign(config)); setImportUrl(null); setImportName('');
             setSelectedDesign(null); setTab('studio');
             setAlert('Design da nuvem carregado. Edite e retorne à seção Minha conta para salvar as alterações.');

@@ -1,16 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail,
   signInWithEmailAndPassword, signOut, type User,
 } from 'firebase/auth';
 import { type DesignConfig, brl, quoteLine } from '../catalog';
+import { type CartItem } from '../records';
+import { isPrivateQuoteEnabled, listPrivateQuotes, requestPrivateQuote, type PrivateQuote } from './quotes';
 import { createId } from '../records';
 import { cloudServices } from './firebase';
 import { deleteRemoteDesign, DesignConflict, listRemoteDesigns, upsertRemoteDesign, type RemoteDesign } from './designs';
 
-export default function CloudWorkspace({ design, onLoad }: {
+export default function CloudWorkspace({ design, onLoad, cart }: {
   design: DesignConfig;
   onLoad: (config: DesignConfig) => void;
+  cart: CartItem[];
 }) {
   const services = cloudServices();
   const [user, setUser] = useState<User | null>(null);
@@ -21,6 +24,9 @@ export default function CloudWorkspace({ design, onLoad }: {
   const [items, setItems] = useState<RemoteDesign[]>([]);
   const [selected, setSelected] = useState<RemoteDesign | null>(null);
   const [pending, setPending] = useState(false);
+  const [remoteQuotes, setRemoteQuotes] = useState<PrivateQuote[]>([]);
+  const pendingQuoteId = useRef<string | null>(null);
+  useEffect(() => { pendingQuoteId.current = null; }, [cart]);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
@@ -73,6 +79,25 @@ export default function CloudWorkspace({ design, onLoad }: {
     } finally { setPending(false); }
   }
 
+  async function requestDemoQuote() {
+    if (!services || !user || pending || cart.length < 1 || cart.length > 12) return;
+    setPending(true); setStatus('');
+    try {
+      const id = pendingQuoteId.current ?? createId();
+      pendingQuoteId.current = id;
+      const result = await requestPrivateQuote(user, cart.map(x => x.config), id);
+      setRemoteQuotes(await listPrivateQuotes(user));
+      setStatus(result.replay ? 'Solicitação já registrada (repetição segura).' : 'Solicitação demonstrativa registrada. Nenhum fornecedor foi contatado.');
+    } catch { setStatus('Falha ao registrar a solicitação. Você pode tentar novamente com a mesma chave.'); }
+    finally { setPending(false); }
+  }
+  async function refreshQuotes() {
+    if (!user || pending) return;
+    setPending(true); setStatus('');
+    try { setRemoteQuotes(await listPrivateQuotes(user)); }
+    catch { setStatus('Não foi possível consultar solicitações.'); }
+    finally { setPending(false); }
+  }
   async function save() {
     if (!services || !user || pending) return;
     setPending(true); setStatus('');
@@ -127,6 +152,18 @@ export default function CloudWorkspace({ design, onLoad }: {
         </article>)}
       </div>
       {items.length === 0 && <div className="empty-state">Nenhum design disponível nesta conta.</div>}
+      <div className="cloud-quotes">
+        <h3>Solicitações autenticadas de orçamento</h3>
+        {isPrivateQuoteEnabled() ? <>
+          <p className="helper">Registro demonstrativo com preço recalculado pelo Worker. Nenhum e-mail, pagamento ou pedido é enviado.</p>
+          <button type="button" onClick={() => void requestDemoQuote()} disabled={pending || cart.length < 1 || cart.length > 12}>Solicitar orçamento autenticado ({cart.length} itens)</button>
+          <button type="button" className="secondary" onClick={() => void refreshQuotes()} disabled={pending}>Atualizar solicitações</button>
+          {remoteQuotes.map(q => <article className="quote-card" key={q.id}>
+            <strong>Solicitação {q.id.slice(0, 8)} · {brl(q.totalCents)}</strong>
+            <p className="helper">Status: {q.status} · {q.createdAt.slice(0, 10)}</p>
+          </article>)}
+        </> : <p className="helper">O endpoint de solicitações autenticadas está desativado até configurar um Worker isolado com credenciais e rate limiting.</p>}
+      </div>
     </> : <form className="cloud-form" onSubmit={e => { e.preventDefault(); void submit('login'); }}>
       <label className="form-label" htmlFor="auth-email">E-mail</label>
       <input id="auth-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} />

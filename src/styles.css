@@ -94,3 +94,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{o
 .cloud-form { max-width:550px }
 .cloud-form input,.content-card input { width:100%;background:#121a2c;color:#f5f4ff;border:1px solid #465675;border-radius:9px;min-height:44px;padding:10px 12px }
 [hidden] { display:none!important }
+
+.cloud-quotes{border-top:1px solid #39445f;margin-top:24px;padding-top:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:start}
+.cloud-quotes h3,.cloud-quotes p{flex-basis:100%}
+.cloud-quotes .quote-card{width:100%}
