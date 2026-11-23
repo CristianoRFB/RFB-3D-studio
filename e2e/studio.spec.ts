@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
+import { createTriangleGLB } from '../src/fixture-glb';
 
 /** All E2E operations use synthetic data and localStorage. No Firebase or production connections. */
 test('configuração, carrinho, orçamento e recarga', async ({ page }) => {
@@ -76,14 +77,7 @@ test('presets, qualidade reduzida e importação GLB local sem autorização com
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('+');
 
-  const encoder = new TextEncoder();
-  const json = encoder.encode(JSON.stringify({ asset: { version: '2.0' }, meshes: [{ primitives: [] }] }));
-  const pad = Math.ceil(json.length / 4) * 4;
-  const bytes = Buffer.alloc(20 + pad, 32);
-  bytes.writeUInt32LE(0x46546c67, 0); bytes.writeUInt32LE(2, 4);
-  bytes.writeUInt32LE(bytes.length, 8); bytes.writeUInt32LE(pad, 12);
-  bytes.writeUInt32LE(0x4e4f534a, 16);
-  Buffer.from(json).copy(bytes, 20);
+  const bytes = Buffer.from(createTriangleGLB());
   await page.getByLabel('Arquivo GLB local').setInputFiles({ name: 'original-demo.glb', mimeType: 'model/gltf-binary', buffer: bytes });
   await expect(page.getByText(/GLB carregado localmente/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Adicionar ao carrinho demo' })).toBeDisabled();
