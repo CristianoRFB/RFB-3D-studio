@@ -52,6 +52,51 @@ service cloud.firestore {
       // Server owns quote totals and state; a browser cannot write them.
       allow create, update, delete: if false;
     }
+    function hasTenantRole(tenantId, roles) {
+      return request.auth != null
+        && request.auth.token.tenantId == tenantId
+        && request.auth.token.role in roles;
+    }
+    function validModel(tenantId) {
+      return request.resource.data.keys().hasAll([
+          'tenantId','ownerUid','modelKey','title','license','status',
+          'revision','schemaVersion','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly([
+          'tenantId','ownerUid','modelKey','title','license','status',
+          'revision','schemaVersion','createdAt','updatedAt'])
+        && request.resource.data.tenantId == tenantId
+        && request.resource.data.ownerUid is string
+        && request.resource.data.ownerUid.size() >= 2
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.modelKey in ['aura','orbita','nexo']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 60
+        && request.resource.data.license == 'ORIGINAL'
+        && request.resource.data.status in ['draft','published']
+        && request.resource.data.revision is int
+        && request.resource.data.updatedAt == request.time;
+    }
+    match /tenants/{tenantId}/models/{modelId} {
+      allow get: if resource.data.status == 'published'
+        || hasTenantRole(tenantId, ['designer','vendedor','admin']);
+      allow list: if hasTenantRole(tenantId, ['designer','vendedor','admin'])
+        && request.query.limit <= 30;
+      allow create: if hasTenantRole(tenantId, ['designer','admin'])
+        && validModel(tenantId)
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.modelKey == modelId
+        && request.resource.data.revision == 1
+        && request.resource.data.createdAt == request.time;
+      allow update: if hasTenantRole(tenantId, ['designer','admin'])
+        && validModel(tenantId)
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.modelKey == resource.data.modelKey
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.revision == resource.data.revision + 1;
+      allow delete: if hasTenantRole(tenantId, ['admin'])
+        || (hasTenantRole(tenantId, ['designer']) && resource.data.ownerUid == request.auth.uid);
+    }
     match /{document=**} {
       allow read, write: if false;
     }

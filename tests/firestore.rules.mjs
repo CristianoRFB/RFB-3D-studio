@@ -48,6 +48,30 @@ try {
   await fail(deleteDoc(notOwner));
   await succeed(deleteDoc(owner));
   await succeed(setDoc(doc(b.firestore(), 'users', 'bob', 'designs', 'own_bob_1'), validDesign('bob')));
+  const designer = env.authenticatedContext('designer1', { role: 'designer', tenantId: 'tenant-a' });
+  const vendor = env.authenticatedContext('vendor1', { role: 'vendedor', tenantId: 'tenant-a' });
+  const admin = env.authenticatedContext('admin1', { role: 'admin', tenantId: 'tenant-a' });
+  const otherTenant = env.authenticatedContext('designer2', { role: 'designer', tenantId: 'tenant-b' });
+  const model = doc(designer.firestore(), 'tenants', 'tenant-a', 'models', 'aura');
+  const modelDoc = {
+    tenantId: 'tenant-a', ownerUid: 'designer1', modelKey: 'aura', title: 'Aura',
+    license: 'ORIGINAL', status: 'draft', revision: 1, schemaVersion: 1,
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+  };
+  await succeed(setDoc(model, modelDoc));
+  await succeed(getDoc(doc(vendor.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
+  await fail(getDoc(doc(otherTenant.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
+  await fail(getDoc(doc(anonymous.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
+  await fail(setDoc(doc(vendor.firestore(), 'tenants', 'tenant-a', 'models', 'nexo'), { ...modelDoc, modelKey: 'nexo', ownerUid:'vendor1' }));
+  await fail(setDoc(doc(otherTenant.firestore(), 'tenants', 'tenant-a', 'models', 'nexo'), { ...modelDoc, modelKey: 'nexo', ownerUid:'designer2' }));
+  await fail(setDoc(doc(designer.firestore(), 'tenants', 'tenant-a', 'models', 'orbita'), { ...modelDoc, modelKey: 'orbita', license: 'STOLEN' }));
+  await fail(updateDoc(model, { revision: 3, updatedAt: serverTimestamp() }));
+  await succeed(updateDoc(model, { status: 'published', revision: 2, updatedAt: serverTimestamp() }));
+  await succeed(getDoc(doc(anonymous.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
+  await fail(updateDoc(doc(vendor.firestore(), 'tenants', 'tenant-a', 'models', 'aura'), { title:'Injected', revision: 3, updatedAt: serverTimestamp() }));
+  await fail(deleteDoc(doc(otherTenant.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
+  await succeed(deleteDoc(doc(admin.firestore(), 'tenants', 'tenant-a', 'models', 'aura')));
+  await fail(setDoc(doc(anonymous.firestore(), 'tenants', 'tenant-a', 'models', 'aura'), modelDoc));
   const count = (await getDocs(query(collection(b.firestore(), 'users', 'bob', 'designs'), limit(30)))).size;
   assert.equal(count, 1);
   checks++;
