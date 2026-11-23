@@ -51,6 +51,7 @@ jobs:
           VITE_FIREBASE_PROJECT_ID: demo-rfb-studio-tests
           VITE_FIREBASE_APP_ID: 1:123456789:web:0123456789abcdef
           VITE_USE_FIREBASE_EMULATORS: 'true'
+          RFB_CLOUD_E2E: '1'
         run: npx firebase emulators:exec --only auth,firestore --project demo-rfb-studio-tests "npx playwright test e2e/cloud.spec.ts --workers=1"
       - name: Publicar capturas de QA sem dados pessoais
         if: always()
