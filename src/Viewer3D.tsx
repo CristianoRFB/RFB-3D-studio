@@ -53,7 +53,7 @@ function DemoModel({ config, productId, addonId, rot, pan, zoom, sizeScale }: Pr
         <boxGeometry args={[.44, .16, .03]} />
         <meshStandardMaterial color="#fff3dc" metalness={.18} roughness={.6} />
       </mesh>}
-    </>
+    </>}
     {productId === 'nexo' && <>
       <mesh position={[0, -.34, 0]}><cylinderGeometry args={[.77, .58, 1.93, 48, 1, true]} /><meshStandardMaterial {...material} side={2} /></mesh>
       <mesh position={[0, -.34, 0]}><cylinderGeometry args={[.70, .51, 1.90, 48]} /><meshStandardMaterial {...material} /></mesh>
@@ -67,7 +67,7 @@ function DemoModel({ config, productId, addonId, rot, pan, zoom, sizeScale }: Pr
         <boxGeometry args={[.57, .18, .028]} />
         <meshStandardMaterial color="#faf3e8" roughness={.64} />
       </mesh>}
-    </>
+    </>}
   </group>;
 }
 
