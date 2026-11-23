@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import {
   createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail,
   signInWithEmailAndPassword, signOut, type User,
@@ -50,8 +50,7 @@ export default function CloudWorkspace({ design, onLoad }: {
     <p className="disclaimer">Para habilitar, configure um Firebase Spark isolado com regras testadas e os identificadores públicos em arquivo de ambiente local. Nenhuma chave privada deve ser colocada no navegador.</p>
   </section>;
 
-  async function submit(event: FormEvent<HTMLFormElement>, action: 'login' | 'signup' | 'reset') {
-    event.preventDefault();
+  async function submit(action: 'login' | 'signup' | 'reset') {
     if (!services) return;
     setPending(true); setStatus('');
     try {
@@ -128,15 +127,15 @@ export default function CloudWorkspace({ design, onLoad }: {
         </article>)}
       </div>
       {items.length === 0 && <div className="empty-state">Nenhum design disponível nesta conta.</div>}
-    </> : <form className="cloud-form" onSubmit={e => void submit(e, 'login')}>
+    </> : <form className="cloud-form" onSubmit={e => { e.preventDefault(); void submit('login'); }}>
       <label className="form-label" htmlFor="auth-email">E-mail</label>
       <input id="auth-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} />
       <label className="form-label" htmlFor="auth-password">Senha</label>
       <input id="auth-password" type="password" autoComplete="current-password" minLength={8} maxLength={128} required value={password} onChange={e => setPassword(e.target.value)} />
       <div className="record-actions">
         <button type="submit" disabled={pending}>Entrar</button>
-        <button type="button" className="secondary" disabled={pending} onClick={e => void submit(e as unknown as FormEvent<HTMLFormElement>, 'signup')}>Criar conta</button>
-        <button type="button" className="secondary" disabled={pending} onClick={e => void submit(e as unknown as FormEvent<HTMLFormElement>, 'reset')}>Recuperar acesso</button>
+        <button type="button" className="secondary" disabled={pending} onClick={() => void submit('signup')}>Criar conta</button>
+        <button type="button" className="secondary" disabled={pending} onClick={() => void submit('reset')}>Recuperar acesso</button>
       </div>
     </form>}
     {status && <p role="status" className="feedback">{status}</p>}

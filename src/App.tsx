@@ -156,7 +156,7 @@ export default function App() {
       </section>
       <div className="demo-banner" role="note">
         <strong>Ambiente de demonstração</strong>
-        <span>Sem cadastro, backend, venda ou envio real. Dados e valores sintéticos; configurações ficam no seu dispositivo. {storageStatus === 'indisponivel' ? 'O armazenamento está indisponível.' : ''}</span>
+        <span>Catálogo e orçamentos são demonstrativos, sem venda ou envio real. Designs podem ser sincronizados com Firebase somente após configurar o projeto e usar a opção Minha conta. {storageStatus === 'indisponivel' ? 'O armazenamento está indisponível.' : ''}</span>
       </div>
       {alert && <p className="feedback" role="status">{alert}</p>}
       {tab === 'studio' && <div className="studio-grid">
