@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react';
+const CloudWorkspace = lazy(() => import('./cloud/CloudWorkspace'));
 import { PRESETS } from './presets';
 import { inspectGLB } from './glb';
 import product from './product.json';
@@ -11,10 +12,10 @@ import { EMPTY_WORKSPACE, STORE_KEY, addCart, createId, createQuote, encodeWorks
 const STEP_KEY = 'rfb:' + product.slug + ':starter-step';
 const DESIGN_KEY = 'rfbstudio:design:v2';
 const LAST_STEP = product.steps.length - 1;
-type Tab = 'studio' | 'catalogo' | 'presets' | 'designs' | 'carrinho' | 'orcamentos' | 'painel';
+type Tab = 'studio' | 'catalogo' | 'presets' | 'designs' | 'carrinho' | 'orcamentos' | 'painel' | 'nuvem';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'studio', label: 'Estúdio' }, { id: 'catalogo', label: 'Catálogo' }, { id: 'presets', label: 'Presets' }, { id: 'designs', label: 'Meus designs' },
-  { id: 'carrinho', label: 'Carrinho' }, { id: 'orcamentos', label: 'Orçamentos' }, { id: 'painel', label: 'Painel demo' },
+  { id: 'carrinho', label: 'Carrinho' }, { id: 'orcamentos', label: 'Orçamentos' }, { id: 'painel', label: 'Painel demo' }, { id: 'nuvem', label: 'Minha conta' },
 ];
 
 function initialDesign(): DesignConfig {
@@ -48,6 +49,7 @@ function today() { return new Date().toISOString(); }
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('studio');
+  const [cloudVisited, setCloudVisited] = useState(false);
   const [design, setDesign] = useState<DesignConfig>(initialDesign);
   const [workspace, setWorkspace] = useState<Workspace>(initialWorkspace);
   const [selectedDesign, setSelectedDesign] = useState<string | null>(null);
@@ -140,7 +142,7 @@ export default function App() {
     </header>
     <nav className="main-nav" aria-label="Seções do estúdio">
       {TABS.map(item => <button key={item.id} type="button" className={'nav-tab ' + (tab === item.id ? 'active' : '')}
-        aria-current={tab === item.id ? 'page' : undefined} onClick={() => { setTab(item.id); setAlert(''); }}>
+        aria-current={tab === item.id ? 'page' : undefined} onClick={() => { setTab(item.id); if (item.id === 'nuvem') setCloudVisited(true); setAlert(''); }}>
         {item.label}
         {item.id === 'carrinho' && workspace.cart.length > 0 && <span className="nav-count">{workspace.cart.length}</span>}
       </button>)}
@@ -323,6 +325,15 @@ export default function App() {
         </div>
         <div className="empty-state">Para implementar um painel de vendas real será necessária autenticação, autorização por vendedor/tenant, backend de preço e Firestore Rules testadas. Nada disso é simulado como produção.</div>
       </section>}
+      {cloudVisited && <div hidden={tab !== 'nuvem'}>
+        <Suspense fallback={<section className="content-card" role="status">Preparando autenticação...</section>}>
+          <CloudWorkspace design={design} onLoad={config => {
+            setDesign(normalizeDesign(config)); setImportUrl(null); setImportName('');
+            setSelectedDesign(null); setTab('studio');
+            setAlert('Design da nuvem carregado. Edite e retorne à seção Minha conta para salvar as alterações.');
+          }}/>
+        </Suspense>
+      </div>}
       <details className="blueprint">
         <summary>Consultar o roteiro original do Starter Pack</summary>
         <div className="blueprint-content">

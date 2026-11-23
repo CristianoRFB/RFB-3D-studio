@@ -88,3 +88,9 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{o
 
 .glb-import input[type=file]{border:1px solid #48546f;background:#141b2d;color:#dce4f3;border-radius:10px;padding:11px;width:100%;font-size:.82rem}
 .import-status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:13px;padding:12px;background:#2b2b42;border-radius:10px;font-size:.8rem}
+
+/* Auth/Firestore optional surface, not a simulated login */
+.cloud-session { display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;padding:15px;background:#1c2940;border-radius:12px;overflow-wrap:anywhere }
+.cloud-form { max-width:550px }
+.cloud-form input,.content-card input { width:100%;background:#121a2c;color:#f5f4ff;border:1px solid #465675;border-radius:9px;min-height:44px;padding:10px 12px }
+[hidden] { display:none!important }
