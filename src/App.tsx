@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { PRESETS } from './presets';
 import product from './product.json';
 import Viewer3D, { Preview2D } from './Viewer3D';
 import { clampStep, nextStep, prevStep } from './flow';
@@ -9,9 +10,9 @@ import { EMPTY_WORKSPACE, STORE_KEY, addCart, createId, createQuote, encodeWorks
 const STEP_KEY = 'rfb:' + product.slug + ':starter-step';
 const DESIGN_KEY = 'rfbstudio:design:v2';
 const LAST_STEP = product.steps.length - 1;
-type Tab = 'studio' | 'catalogo' | 'designs' | 'carrinho' | 'orcamentos' | 'painel';
+type Tab = 'studio' | 'catalogo' | 'presets' | 'designs' | 'carrinho' | 'orcamentos' | 'painel';
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'studio', label: 'Estúdio' }, { id: 'catalogo', label: 'Catálogo' }, { id: 'designs', label: 'Meus designs' },
+  { id: 'studio', label: 'Estúdio' }, { id: 'catalogo', label: 'Catálogo' }, { id: 'presets', label: 'Presets' }, { id: 'designs', label: 'Meus designs' },
   { id: 'carrinho', label: 'Carrinho' }, { id: 'orcamentos', label: 'Orçamentos' }, { id: 'painel', label: 'Painel demo' },
 ];
 
@@ -227,6 +228,22 @@ export default function App() {
         </div>
         {PRODUCTS.filter(p => (p.name + ' ' + p.category).toLocaleLowerCase('pt-BR').includes(search.toLocaleLowerCase('pt-BR'))).length === 0 &&
           <div className="empty-state">Nenhum produto encontrado. Tente outra busca.</div>}
+      </section>}
+      {tab === 'presets' && <section className="content-card" aria-label="Presets de personalização">
+        <div className="section-head"><div><p className="viewer-kicker">COLEÇÃO AUTORAL</p><h2>Comece com um preset</h2></div><span className="viewer-tag">{PRESETS.length} PRESETS</span></div>
+        <p className="helper">Combinações demonstrativas prontas para personalizar. Todos os modelos e cores são sintéticos e locais.</p>
+        <div className="catalog-grid">
+          {PRESETS.map(preset => <article key={preset.id} className="product-card">
+            <div className="product-art"><Preview2D productId={preset.config.productId} colorId={preset.config.colorId}/></div>
+            <div className="product-copy"><p className="viewer-kicker">{getProduct(preset.config.productId).name}</p>
+              <h3>{preset.title}</h3><p>{preset.description}</p><strong>{brl(quoteLine(preset.config).totalCents)}</strong>
+              <button type="button" onClick={() => {
+                setDesign(normalizeDesign(preset.config)); setSelectedDesign(null); setDesignName(preset.title);
+                setTab('studio'); setAlert('Preset carregado. Ajuste as opções e salve seu próprio design.');
+              }}>Usar este preset</button>
+            </div>
+          </article>)}
+        </div>
       </section>}
       {tab === 'designs' && <section className="content-card" aria-label="Designs salvos">
         <div className="section-head"><div><p className="viewer-kicker">GALERIA LOCAL</p><h2>Meus designs</h2></div><button type="button" onClick={() => setTab('studio')}>Novo design</button></div>
