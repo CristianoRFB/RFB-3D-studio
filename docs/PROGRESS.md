@@ -1,25 +1,25 @@
-# RFB Studio — progresso e evidência
+# RFB Studio — checkpoint e progresso verificável
 
-| Fatiamento | Critério | Estado em 22/11/2026 | Evidência |
+**Repositório:** CristianoRFB/RFB-3D-studio · branch `feature/rfb-starter-pack-v1` · [PR #1](https://github.com/CristianoRFB/RFB-3D-studio/pull/1) Draft. Toda conclusão abaixo é limitada à demonstração; nenhuma funcionalidade comercial foi publicada.
+
+| Fatia | Implementação | Teste/Evidência | Estado |
 |---|---|---|---|
-| S001 | Conferir repo, PR, Issues e código | INSPECIONADO | PR #1 draft, branch feature/rfb-starter-pack-v1, HEAD de entrada 23035611c2da8dd86f86228231c0a0fabbe32ed4; 0 Issues abertas |
-| S002 / AC-01 | Renderizar geometria 3D original com WebGL | IMPLEMENTADO_NAO_VERIFICADO | src/Viewer3D.tsx; execução browser NOT_RUN |
-| S002 / AC-02 | Orbit/pan/zoom por pointer e teclado | IMPLEMENTADO_NAO_VERIFICADO | src/Viewer3D.tsx; E2E NOT_RUN |
-| S002 / AC-03 | Troca de cor e acabamento | IMPLEMENTADO_NAO_VERIFICADO | src/studio.ts, src/App.tsx; Vitest PASS no commit 77856b1 |
-| S002 / AC-10 | Qualidade reduzida | IMPLEMENTADO_NAO_VERIFICADO | botão de qualidade, dpr reduzido; avaliação real NOT_RUN |
-| S002 / AC-11 | Fallback 2D | IMPLEMENTADO_NAO_VERIFICADO | SVG local e detecção WebGL; E2E WebGL off NOT_RUN |
-| S004 / AC-06 (parcial) | Configuração restaurada em reload local | IMPLEMENTADO_NAO_VERIFICADO | localStorage versão 1; suite de encode/decode PASS no CI 77856b1; NÃO É persistência remota |
-| S003 / AC-05 | Preço calculado de catálogo confiável | PLANEJADO | nenhum código de preço nesta fatia |
-| S005 / AC-09 | Orçamento real | PLANEJADO | nenhum envio real autorizado |
+| S001 | Starter Pack, 7 diagramas, 58 T-IDs, fontes e PR | Inventário de arquivos, GitHub | DOCS IMPORTED |
+| S002 | 3 modelos procedurais WebGL + orbit/pan/zoom + 2D/reduced | Chromium E2E geral e fallback; QA WebGL GPU específica pendente | DEMO_PARTIAL |
+| S003 | 4 cores, acabamento, tamanhos, acessórios, preço integer-cents com versão | Vitest preços/combinações, Playwright selecionar variantes | DEMO_TESTED |
+| S004 | Designs, carrinho, presets, export JSON/SVG, link de config | Vitest serialização/hidratação, E2E recarga e exportação | LOCAL_DEMO_TESTED |
+| S005 | Histórico de orçamento sintético, painel local de métricas, API Cloudflare demo sem persistência | Vitest negativos em `server/worker.ts`; E2E orçamento local | DEMO_TESTED; API NOT_DEPLOYED |
+| S006 | GLB próprio local com 8 MB, validação e proibição de URLs externas | Vitest estrutura, E2E importação em andamento no HEAD; perf móvel e memória não medidas | PARTIAL |
 
-## QA da revisão
+**Último CI completo confirmado antes dos commits mais recentes:** [GitHub Actions #45094283215](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45094283215), com TypeScript, Vitest, Build e Playwright PASS. A revisão posterior exige novo CI. Screenshots mobile/desktop estão em artefatos do workflow, não são mockups. NÃO afirmar performance, segurança ou WCAG homologadas sem ensaio.
 
-- **CI PASS para commit 77856b1:** npm install, TypeScript typecheck, Vitest e Vite build passaram no runner Node 22 do [workflow 45091528752](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45091528752). Lint dedicado: NOT_RUN; Playwright/browser WebGL: NOT_RUN; ambiente local continua sem dependências.
-- Checks do HEAD de entrada: nenhum status reportado; nenhum workflow run.
-- CI definido em `.github/workflows/verify.yml`: PASS no commit 77856b1. Revalidar no HEAD após mudanças posteriores.
-- Dependências: sem lockfile no scaffold inicial. Gerar e versionar package-lock.json após instalação segura e repetir os checks.
-- Aviso: este documento registra implementação em código, não homologa o comportamento no navegador.
+**Backend e publicação:** Firebase Auth = NOT_IMPLEMENTED; Firestore Rules = WRITTEN_NOT_TESTED_EMULATOR; Worker demo = WRITTEN_NOT_DEPLOYED; Cloudflare static = NOT_DEPLOYED; orçamento comercial/pedido = NOT_IMPLEMENTED. Zero pagamentos ou envio reais. `package-lock.json` ainda pendente de versionamento neste checkpoint.
 
-## Riscos AntiVibeCoding
+**BLOQUEADORES rastreados:** [Issue #2](https://github.com/CristianoRFB/RFB-3D-studio/issues/2) Auth/Firestore, [Issue #3](https://github.com/CristianoRFB/RFB-3D-studio/issues/3) preços/pedidos, [Issue #4](https://github.com/CristianoRFB/RFB-3D-studio/issues/4) QA/infra. O PR permanece Draft.
 
-AV-01/02: comportamento gráfico e compilação sem teste -> NÃO VERIFICADO. AV-09/16: dependências e lockfile precisam de instalação CI. AV-11: apenas uma fatia, sem backend/cobrança. AV-12: acessibilidade responsiva e WebGL off precisam Playwright. AV-20: design conceitual separado de screenshot real.
+**Riscos RFB AntiVibeCoding:** AV-01/02 diferenças entre código e execução; AV-03/05 auth e regras sem prova; AV-09 lockfile/versões; AV-11 não substituir requisitos por UI vazia; AV-12 QA; AV-16 ambiente/cloud; AV-20 docs/estado. **STOP:** nenhum patch exploratório repetido, não promover sem evidência.
+
+## Próxima fatia
+1. Validar CI no HEAD atual; corrigir erros por log sem testar cegamente.
+2. Materializar `package-lock.json`, mudar CI para `npm ci` e repetir suite.
+3. Testes Firebase Auth/Rules em emuladores isolados, modelo RBAC/tenancy real e API de preços autenticada. Homologação Cloudflare isolada só após autorização e conferência de custo.

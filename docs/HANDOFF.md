@@ -1,25 +1,24 @@
-# RFB Studio — handoff verificável
+# RFB Studio — handoff autônomo
 
-**Data:** 22/11/2026 (America/Sao_Paulo)
-**Repo:** CristianoRFB/RFB-3D-studio; branch: feature/rfb-starter-pack-v1; PR #1 draft; SHA de entrada: 23035611c2da8dd86f86228231c0a0fabbe32ed4.
+**Data:** 22/11/2026 (America/Sao_Paulo). **Repo:** CristianoRFB/RFB-3D-studio. **PR:** #1 Draft na branch `feature/rfb-starter-pack-v1`. **HEAD de início desta rodada:** f43ab3287fbbf239ded1e9648428cc01549ef6cd. Conferir sempre HEAD real antes de escrever.
 
-## Fatia atual S002
+## O que foi escrito
+- S003: catálogo de 3 produtos, preços sintéticos em centavos, compatibilidade e testes adversariais.
+- S004: 6 presets, designs locais, carrinho, orçamento JSON, export SVG, links por configuração.
+- S005: endpoint Workers `/api/demo-quote` stateless, validação estrita, sem deploy; Firestore Rules proposta (não testada), threat model e matriz de papéis.
+- S006: prévia GLB local limitada e não comercial, fallback, mobile, modos de qualidade.
+- CI: Vitest unitário, Build/TypeScript e Playwright Chromium + capturas sem dados pessoais; ver `docs/PROGRESS.md` para última execução.
 
-Trocar o roteiro estático G1 por um configurador visual com modelo original procedural (Garrafa Aura); opção de cor/acabamento, interação orbit/pan/zoom por ponteiro e teclado, qualidade reduzida e fallback 2D. Preservar o roteiro original em `<details>`, sem simular autenticação/orçamento/envio. Dados locais são demonstrativos.
+## Integridade e não-escopo
+- Nenhuma edição na metodologia-mãe ou outros produtos. Cloudflare consultada apenas em leitura; nenhum Worker/Pages criado, apagado, publicado ou modificado.
+- Firebase não conectado. Nenhum usuário real, produto real, orçamento vinculante, pagamento ou notificação foi usado.
+- Design original do usuário preservado em especificação/UX; fotos/PNGs conceituais originais continuam fora do repo por auditoria de licença.
 
-## Limitações e próximos passos
+## Continuar sem recuperar o chat
+1. Revisar `git HEAD`, Issues #2–#4, PR #1, reviews e checks; resolver falhas do CI no HEAD, não copiar status de SHA anterior.
+2. Versionar lockfile, `npm ci`, TypeScript, Vitest e Playwright WebGL on/off, testes de GLB real.
+3. Para feature real: configurar Auth e Firestore só em projeto Spark autorizado e isolado; escrever testes Rules A/B/admin antes de habilitar sincronização. Validar pricing e server authority.
+4. Para release: avaliar Cloudflare Workers Static Assets Free e preview não produtivo com custos/rollback; não executar deploy antes de aprovação adequada.
+5. Manter `PROJECT_STATUS.json` e `docs/PROGRESS.md` como checkpoints; preservar PR Draft até gates completos.
 
-1. Consultar HEAD, PR e Issues ao retomar; conferir CI do commit mais recente.
-2. Executar `npm install`, versionar `package-lock.json`, `npm run typecheck`, `npm run test`, `npm run build`. Falha deve ser registrada e corrigida pelo erro real.
-3. QA no navegador WebGL disponível e desativado; mobile 320/390, desktop 1440; capturar screenshot real e checar atalhos, contraste e reduced motion.
-4. S003: precificação determinística de catálogo sintético e regras de incompatibilidade; nunca confiar em preços de cliente. Não adicionar Firebase/cobrança sem decisão.
-5. NÃO mesclar PR nem publicar em produção até gates comprovados.
-
-**Riscos:** AV-01, AV-02, AV-09, AV-12, AV-16; gates de QA abertos. Assets e licenças em docs/ASSETS-LICENSES.md. Checkpoint de commit SHA final deve ser conferido no GitHub.
-
-## Checkpoint S002 — evidência CI
-
-- Commit de implementação: [77856b1](https://github.com/CristianoRFB/RFB-3D-studio/commit/77856b1f6c41a6a1465b9a9ec53f31d410c58219) na branch do PR #1, sem merge.
-- GitHub Actions [run 45091528752](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45091528752): instalação PASS; Typecheck PASS; Vitest PASS; Build PASS.
-- **NOT_RUN:** Playwright, screenshot real, WebGL on/off, verificação em mobile. Lockfile não versionado.
-- Alterações documentais posteriores exigem nova confirmação do HEAD/CI.
+**Status honesto:** `INTERACTIVE_LOCAL_DEMO`, **não 90% de produção**. Cobertura funcional demonstrativa e 58 T-IDs detalhados em `docs/METHOD-COVERAGE.md`.

@@ -1,5 +1,7 @@
 # RFBStudio — UX, identidade e catálogo completo de telas
 
+> **ATUALIZAÇÃO G3:** status `UI_DEMO` indica cobertura funcional dentro de componentes compartilhados, **não** página separada, aplicação homologada ou integração com backend. `LOCAL_DEMO` indica `localStorage`. `GLB_PREVIEW_ONLY` não cadastra produtos nem torna preços vinculantes. T-IDs não implementados permanecem pendentes. QA de viewport específico e validação de licença continuam em aberto.
+
 > **BASE DO USUÁRIO:** os 58 T-IDs abaixo são os planejados na fonte original, NÃO telas programadas. Os 10 PNGs de conceito existentes no ZIP são artes demonstrativas, NÃO prints do produto executando. **Este repositório público recebe o catálogo textual, mas os PNGs do ZIP original ainda não foram importados nem revisados quanto à marca e licença.**
 
 ## Identidade de produto baseada na fonte
@@ -41,40 +43,40 @@ Outros arquivos do original: `design/desktop.svg`, `design/mobile.svg`, 8 PNG de
 
 | Tela | Especificação original | Estágio |
 |---|---|---|
-| T001 | Landing / apresentação | `NOT_IMPLEMENTED` |
-| T002 | Cadastro / criar conta | `NOT_IMPLEMENTED` |
-| T003 | Login e recuperar acesso | `NOT_IMPLEMENTED` |
-| T004 | Onboarding e perfil | `NOT_IMPLEMENTED` |
-| T005 | Página principal / feed | `NOT_IMPLEMENTED` |
-| T006 | Busca e filtros | `NOT_IMPLEMENTED` |
-| T007 | Detalhes do recurso | `NOT_IMPLEMENTED` |
-| T008 | Fluxo de criação | `NOT_IMPLEMENTED` |
-| T009 | Fluxo de edição | `NOT_IMPLEMENTED` |
-| T010 | Confirmação / revisão | `NOT_IMPLEMENTED` |
-| T011 | Estado concluído / recibo | `NOT_IMPLEMENTED` |
-| T012 | Lista pessoal / histórico | `NOT_IMPLEMENTED` |
-| T013 | Notificações | `NOT_IMPLEMENTED` |
-| T014 | Mensagens ou contato | `NOT_IMPLEMENTED` |
-| T015 | Central de ajuda | `NOT_IMPLEMENTED` |
-| T016 | Preferências e privacidade | `NOT_IMPLEMENTED` |
-| T017 | Acesso e segurança | `NOT_IMPLEMENTED` |
-| T018 | Página vazia / primeira vez | `NOT_IMPLEMENTED` |
-| T019 | Carregamento e skeleton | `NOT_IMPLEMENTED` |
-| T020 | Erro de rede / retentar | `NOT_IMPLEMENTED` |
-| T021 | Sem permissão / bloqueio | `NOT_IMPLEMENTED` |
-| T022 | Estado de conflito concorrente | `NOT_IMPLEMENTED` |
-| T023 | Admin: visão geral | `NOT_IMPLEMENTED` |
-| T024 | Admin: gestão de usuários | `NOT_IMPLEMENTED` |
-| T025 | Admin: moderação e auditoria | `NOT_IMPLEMENTED` |
-| T026 | Admin: regras e configurações | `NOT_IMPLEMENTED` |
-| T027 | Admin: relatórios | `NOT_IMPLEMENTED` |
-| T028 | Página 404 / recurso indisponível | `NOT_IMPLEMENTED` |
-| T029 | Módulo / Catálogo 3D — lista | `NOT_IMPLEMENTED` |
-| T030 | Módulo / Catálogo 3D — detalhe | `NOT_IMPLEMENTED` |
-| T031 | Módulo / Catálogo 3D — criar/editar | `NOT_IMPLEMENTED` |
-| T032 | Módulo / Visualizador — lista | `NOT_IMPLEMENTED` |
-| T033 | Módulo / Visualizador — detalhe | `NOT_IMPLEMENTED` |
-| T034 | Módulo / Visualizador — criar/editar | `NOT_IMPLEMENTED` |
+| T001 | Landing / apresentação | `UI_DEMO` |
+| T002 | Cadastro / criar conta | `UI_DEMO` |
+| T003 | Login e recuperar acesso | `UI_DEMO` |
+| T004 | Onboarding e perfil | `UI_DEMO` |
+| T005 | Página principal / feed | `UI_DEMO` |
+| T006 | Busca e filtros | `UI_DEMO` |
+| T007 | Detalhes do recurso | `UI_DEMO` |
+| T008 | Fluxo de criação | `LOCAL_DEMO` |
+| T009 | Fluxo de edição | `UI_DEMO` |
+| T010 | Confirmação / revisão | `UI_DEMO` |
+| T011 | Estado concluído / recibo | `UI_DEMO` |
+| T012 | Lista pessoal / histórico | `UI_DEMO` |
+| T013 | Notificações | `UI_DEMO` |
+| T014 | Mensagens ou contato | `UI_DEMO` |
+| T015 | Central de ajuda | `UI_DEMO` |
+| T016 | Preferências e privacidade | `UI_DEMO` |
+| T017 | Acesso e segurança | `UI_DEMO` |
+| T018 | Página vazia / primeira vez | `UI_DEMO` |
+| T019 | Carregamento e skeleton | `UI_DEMO` |
+| T020 | Erro de rede / retentar | `UI_DEMO` |
+| T021 | Sem permissão / bloqueio | `LOCAL_DEMO` |
+| T022 | Estado de conflito concorrente | `LOCAL_DEMO` |
+| T023 | Admin: visão geral | `LOCAL_DEMO` |
+| T024 | Admin: gestão de usuários | `LOCAL_DEMO` |
+| T025 | Admin: moderação e auditoria | `LOCAL_DEMO` |
+| T026 | Admin: regras e configurações | `LOCAL_DEMO` |
+| T027 | Admin: relatórios | `LOCAL_DEMO` |
+| T028 | Página 404 / recurso indisponível | `LOCAL_DEMO` |
+| T029 | Módulo / Catálogo 3D — lista | `LOCAL_DEMO` |
+| T030 | Módulo / Catálogo 3D — detalhe | `UI_DEMO` |
+| T031 | Módulo / Catálogo 3D — criar/editar | `UI_DEMO` |
+| T032 | Módulo / Visualizador — lista | `GLB_PREVIEW_ONLY` |
+| T033 | Módulo / Visualizador — detalhe | `METRICS_LOCAL_ONLY` |
+| T034 | Módulo / Visualizador — criar/editar | `METRICS_LOCAL_ONLY` |
 | T035 | Módulo / Materiais e cores — lista | `NOT_IMPLEMENTED` |
 | T036 | Módulo / Materiais e cores — detalhe | `NOT_IMPLEMENTED` |
 | T037 | Módulo / Materiais e cores — criar/editar | `NOT_IMPLEMENTED` |
