@@ -21,7 +21,18 @@ service cloud.firestore {
         && request.resource.data.config.quantity is int
         && request.resource.data.config.quantity >= 1
         && request.resource.data.config.quantity <= 10
-        && request.resource.data.config.addonId in ['nenhum', 'alca', 'base', 'suporte', 'gravacao'];
+        && request.resource.data.config.addonId in ['nenhum', 'alca', 'base', 'suporte', 'gravacao']
+        && (request.resource.data.config.productId != 'nexo' || request.resource.data.config.finishId == 'fosco')
+        && (
+          (request.resource.data.config.productId == 'aura' &&
+            request.resource.data.config.addonId in ['nenhum', 'alca', 'gravacao']) ||
+          (request.resource.data.config.productId == 'orbita' &&
+            request.resource.data.config.addonId in ['nenhum', 'base', 'gravacao']) ||
+          (request.resource.data.config.productId == 'nexo' &&
+            request.resource.data.config.addonId in ['nenhum', 'suporte', 'gravacao'])
+        )
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
     }
     match /users/{uid}/designs/{id} {
       allow get, list: if isSelf(uid);

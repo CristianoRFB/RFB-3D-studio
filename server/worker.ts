@@ -24,8 +24,26 @@ export async function handleRequest(request: Request): Promise<Response> {
   if (pathname !== '/api/demo-quote') return response(404, { error: 'NOT_FOUND' });
   if (request.method !== 'POST') return response(405, { error: 'METHOD_NOT_ALLOWED' });
   if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) return response(415, { error: 'UNSUPPORTED_MEDIA_TYPE' });
-  const raw = await request.text();
-  if (raw.length > 16384) return response(413, { error: 'PAYLOAD_TOO_LARGE' });
+  // Stream a bounded payload: never buffer an arbitrary request body in a Free Worker.
+  const reader = request.body?.getReader();
+  const chunks: Uint8Array[] = [];
+  let bytes = 0;
+  if (reader) {
+    while (true) {
+      const next = await reader.read();
+      if (next.done) break;
+      bytes += next.value.byteLength;
+      if (bytes > 16384) {
+        await reader.cancel();
+        return response(413, { error: 'PAYLOAD_TOO_LARGE' });
+      }
+      chunks.push(next.value);
+    }
+  }
+  const payload = new Uint8Array(bytes);
+  let cursor = 0;
+  for (const chunk of chunks) { payload.set(chunk, cursor); cursor += chunk.byteLength; }
+  const raw = new TextDecoder().decode(payload);
   let input: unknown;
   try { input = JSON.parse(raw) as unknown; }
   catch { return response(400, { error: 'MALFORMED_JSON' }); }
