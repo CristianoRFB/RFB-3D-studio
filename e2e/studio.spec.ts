@@ -84,3 +84,20 @@ test('presets, qualidade reduzida e importação GLB local sem autorização com
   await page.getByRole('button', { name: 'Remover GLB local' }).click();
   await expect(page.getByRole('button', { name: 'Adicionar ao carrinho demo' })).toBeEnabled();
 });
+
+
+test('responsividade 320 a 1440px sem rolagem horizontal', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('checkbox', { name: 'Prévia 2D' }).check();
+  await mkdir('artifacts', { recursive: true });
+  for (const width of [320, 360, 390, 430, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(page.getByRole('navigation', { name: 'Seções do estúdio' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Salvar design local' })).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, 'overflow horizontal na largura ' + width).toBeLessThanOrEqual(1);
+    if ([320, 430, 768, 1024].includes(width)) {
+      await page.screenshot({ path: 'artifacts/rfb-studio-responsive-' + width + '.png', fullPage: true });
+    }
+  }
+});
