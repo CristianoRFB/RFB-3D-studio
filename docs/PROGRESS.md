@@ -13,7 +13,7 @@
 
 **Último CI completo confirmado antes dos commits mais recentes:** [GitHub Actions #45094283215](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45094283215), com TypeScript, Vitest, Build e Playwright PASS. A revisão posterior exige novo CI. Screenshots mobile/desktop estão em artefatos do workflow, não são mockups. NÃO afirmar performance, segurança ou WCAG homologadas sem ensaio.
 
-**Backend e publicação:** Firebase Auth = NOT_IMPLEMENTED; Firestore Rules = WRITTEN_NOT_TESTED_EMULATOR; Worker demo = WRITTEN_NOT_DEPLOYED; Cloudflare static = NOT_DEPLOYED; orçamento comercial/pedido = NOT_IMPLEMENTED. Zero pagamentos ou envio reais. `package-lock.json` ainda pendente de versionamento neste checkpoint.
+**Backend e publicação:** Firebase Auth = NOT_IMPLEMENTED; Firestore Rules = WRITTEN_NOT_TESTED_EMULATOR; Worker demo = WRITTEN_NOT_DEPLOYED; Cloudflare static = NOT_DEPLOYED; orçamento comercial/pedido = NOT_IMPLEMENTED. Zero pagamentos ou envio reais. `package-lock.json` foi versionado a partir de CI anterior; `npm ci` deve passar no novo HEAD antes de fechar o gate.
 
 **BLOQUEADORES rastreados:** [Issue #2](https://github.com/CristianoRFB/RFB-3D-studio/issues/2) Auth/Firestore, [Issue #3](https://github.com/CristianoRFB/RFB-3D-studio/issues/3) preços/pedidos, [Issue #4](https://github.com/CristianoRFB/RFB-3D-studio/issues/4) QA/infra. O PR permanece Draft.
 
@@ -21,5 +21,5 @@
 
 ## Próxima fatia
 1. Validar CI no HEAD atual; corrigir erros por log sem testar cegamente.
-2. Materializar `package-lock.json`, mudar CI para `npm ci` e repetir suite.
+2. Conferir `npm ci` e repetir suíte completa no HEAD após versionar lockfile.
 3. Testes Firebase Auth/Rules em emuladores isolados, modelo RBAC/tenancy real e API de preços autenticada. Homologação Cloudflare isolada só após autorização e conferência de custo.

@@ -23,7 +23,7 @@
   "source_png_assets": "NOT_IMPORTED",
   "monthly_recurring_cost_added_brl": 0,
   "requirements_trace": "docs/PROGRESS.md",
-  "next_action": "Verify HEAD CI, version npm lockfile, perform emulator Auth/Rules tests and get approval for isolated Cloudflare preview. No production merge.",
+  "next_action": "Confirm npm ci, TypeScript, Vitest, Chromium E2E on HEAD; Firebase Rules/Auth and production infrastructure still blocked.",
   "ci_run_url": "https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45091528752",
   "catalog_3_models": "IMPLEMENTED_BROWSER_QA_PARTIAL",
   "preset_gallery": "IMPLEMENTED_UNIT_TESTED",
@@ -43,5 +43,6 @@
     2,
     3,
     4
-  ]
+  ],
+  "lockfile": "VERSIONED_PENDING_NPM_CI_CI_HEAD"
 }

@@ -27,7 +27,7 @@ npm run e2e
 npm run dev
 ```
 
-**Aviso:** `npm ci` exige `package-lock.json` versionado. Enquanto a geração do lockfile estiver pendente, use `npm install` no ambiente local ou o workflow CI atual. Consulte o status mais recente do PR antes de considerar este gate fechado.
+**Lockfile:** `package-lock.json` versionado pelo CI; `npm ci` reproduz as dependências. Os gates devem ser reexecutados no HEAD atual.
 
 - [CI e relatórios](https://github.com/CristianoRFB/RFB-3D-studio/actions)
 - [PR #1 — desenvolvimento](https://github.com/CristianoRFB/RFB-3D-studio/pull/1)

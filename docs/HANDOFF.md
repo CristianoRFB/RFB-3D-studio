@@ -16,7 +16,7 @@
 
 ## Continuar sem recuperar o chat
 1. Revisar `git HEAD`, Issues #2–#4, PR #1, reviews e checks; resolver falhas do CI no HEAD, não copiar status de SHA anterior.
-2. Versionar lockfile, `npm ci`, TypeScript, Vitest e Playwright WebGL on/off, testes de GLB real.
+2. Validar lockfile agora versionado com `npm ci`, TypeScript, Vitest e Playwright WebGL on/off, testes de GLB real.
 3. Para feature real: configurar Auth e Firestore só em projeto Spark autorizado e isolado; escrever testes Rules A/B/admin antes de habilitar sincronização. Validar pricing e server authority.
 4. Para release: avaliar Cloudflare Workers Static Assets Free e preview não produtivo com custos/rollback; não executar deploy antes de aprovação adequada.
 5. Manter `PROJECT_STATUS.json` e `docs/PROGRESS.md` como checkpoints; preservar PR Draft até gates completos.
