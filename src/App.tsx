@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { PRESETS } from './presets';
+import { inspectGLB } from './glb';
 import product from './product.json';
 import Viewer3D, { Preview2D } from './Viewer3D';
 import { clampStep, nextStep, prevStep } from './flow';
@@ -52,6 +53,8 @@ export default function App() {
   const [selectedDesign, setSelectedDesign] = useState<string | null>(null);
   const [designName, setDesignName] = useState('Meu design');
   const [search, setSearch] = useState('');
+  const [importUrl, setImportUrl] = useState<string | null>(null);
+  const [importName, setImportName] = useState('');
   const [alert, setAlert] = useState('');
   const [storageStatus, setStorageStatus] = useState<'verificando' | 'salvo' | 'indisponivel'>('verificando');
   const [step, setStep] = useState(() => {
@@ -66,6 +69,7 @@ export default function App() {
   const quoteTotal = workspace.quotes.reduce((sum, quote) => sum + quote.totalCents, 0);
   const theme = { '--accent': product.accent } as CSSProperties;
 
+  useEffect(() => () => { if (importUrl) URL.revokeObjectURL(importUrl); }, [importUrl]);
   useEffect(() => {
     try {
       window.localStorage.setItem(DESIGN_KEY, JSON.stringify(normalizeDesign(design)));
@@ -85,9 +89,10 @@ export default function App() {
   };
   const choose = (id: DesignConfig['productId']) => {
     setDesign(current => chooseProduct(current, id));
-    setSelectedDesign(null); setAlert('Produto carregado. Ajuste o design no estúdio.'); setTab('studio');
+    setSelectedDesign(null); setImportUrl(null); setImportName(''); setAlert('Produto carregado. Ajuste o design no estúdio.'); setTab('studio');
   };
   const saveCurrent = () => {
+    if (importUrl) { setAlert('Remova o arquivo GLB local antes de salvar um produto de catálogo.'); return; }
     try {
       const id = selectedDesign ?? createId();
       setWorkspace(ws => saveDesign(ws, design, designName, today(), id));
@@ -95,6 +100,7 @@ export default function App() {
     } catch { setAlert('Não foi possível salvar o design neste ambiente.'); }
   };
   const addCurrentToCart = () => {
+    if (importUrl) { setAlert('Modelos GLB externos não possuem preços aprovados. Remova o arquivo para continuar.'); return; }
     try {
       const id = createId();
       setWorkspace(ws => addCart(ws, design, today(), id));
@@ -110,6 +116,7 @@ export default function App() {
     } catch { setAlert('Não foi possível criar o orçamento.'); }
   };
   const loadSaved = (id: string) => {
+    setImportUrl(null); setImportName('');
     const saved = workspace.designs.find(x => x.id === id);
     if (!saved) return;
     setDesign(normalizeDesign(saved.config)); setDesignName(saved.label); setSelectedDesign(id);
@@ -151,11 +158,31 @@ export default function App() {
       </div>
       {alert && <p className="feedback" role="status">{alert}</p>}
       {tab === 'studio' && <div className="studio-grid">
-        <Viewer3D config={design} productId={design.productId} sizeScale={size.scale} />
+        <Viewer3D config={design} productId={design.productId} sizeScale={size.scale} importUrl={importUrl} />
         <aside className="customizer" aria-label="Personalização do produto">
           <div className="panel-head"><span className="viewer-kicker">02 / PERSONALIZAR</span><span className="panel-counter">CATÁLOGO DEMO</span></div>
           <h2>{currentProduct.name}</h2>
           <p className="helper">{currentProduct.description}</p>
+          <div className="group glb-import">
+            <h3>Prévia de modelo GLB próprio</h3>
+            <p className="helper">Importe um arquivo GLB autoral de até 8 MB; apenas prévia em memória. Não é salvo, enviado ao servidor ou incluído no preço.</p>
+            <label className="form-label" htmlFor="model-upload">Arquivo GLB local</label>
+            <input id="model-upload" type="file" accept=".glb,model/gltf-binary" onChange={async e => {
+              const file = e.currentTarget.files?.[0];
+              if (!file) return;
+              try {
+                const bytes = await file.arrayBuffer();
+                const result = inspectGLB(bytes);
+                const url = URL.createObjectURL(new Blob([bytes], { type: 'model/gltf-binary' }));
+                setImportUrl(url); setImportName(file.name.slice(0, 70));
+                setAlert('GLB carregado localmente: ' + result.meshCount + ' malha(s). Vendas desabilitadas nesta prévia.');
+              } catch (error) { setAlert(error instanceof Error ? error.message : 'Não foi possível importar o modelo.'); }
+              e.target.value = '';
+            }} />
+            {importUrl && <div className="import-status"><strong>Modelo externo: {importName}</strong>
+              <button type="button" className="secondary" onClick={() => { setImportUrl(null); setImportName(''); setAlert('Prévia GLB removida.'); }}>Remover GLB local</button>
+            </div>}
+          </div>
           <div className="group">
             <h3>Produto</h3>
             <div className="select-list" role="group" aria-label="Produtos disponíveis">
@@ -201,13 +228,13 @@ export default function App() {
           <div className="save-panel">
             <label className="form-label" htmlFor="design-name">Nome do design (sem dados pessoais)</label>
             <input id="design-name" type="text" value={designName} maxLength={60} onChange={e => setDesignName(e.target.value)} />
-            <button type="button" className="primary-full" onClick={saveCurrent}>Salvar design local</button>
-            <button type="button" className="primary-full secondary" onClick={addCurrentToCart}>Adicionar ao carrinho demo</button>
+            <button type="button" className="primary-full" onClick={saveCurrent} disabled={!!importUrl}>Salvar design local</button>
+            <button type="button" className="primary-full secondary" onClick={addCurrentToCart} disabled={!!importUrl}>Adicionar ao carrinho demo</button>
           </div>
           <div className="utility-buttons">
-            <button type="button" className="secondary" onClick={exportDesign}>Exportar configuração JSON</button>
-            <button type="button" className="secondary" onClick={export2D}>Baixar prévia 2D SVG</button>
-            <button type="button" className="secondary" onClick={share}>Gerar link de configuração</button>
+            <button type="button" className="secondary" onClick={exportDesign} disabled={!!importUrl}>Exportar configuração JSON</button>
+            <button type="button" className="secondary" onClick={export2D} disabled={!!importUrl}>Baixar prévia 2D SVG</button>
+            <button type="button" className="secondary" onClick={share} disabled={!!importUrl}>Gerar link de configuração</button>
             <button type="button" className="secondary" onClick={() => { setDesign({ ...INITIAL_DESIGN }); setSelectedDesign(null); setAlert('Configuração restaurada.'); }}>Restaurar padrão</button>
           </div>
           <p className="disclaimer">Valores sem impostos, frete ou compromisso comercial. O preço é calculado no cliente e NÃO é válido como cobrança ou orçamento contratado.</p>

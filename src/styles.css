@@ -85,3 +85,6 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{o
 .metrics span{font-size:.75rem;color:#bccadf;display:block;margin-bottom:14px}.metrics strong{font-size:clamp(1.1rem,2vw,1.5rem);overflow-wrap:anywhere}
 @media(max-width:750px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.demo-banner{flex-direction:column;align-items:flex-start;gap:4px}.catalog-grid{grid-template-columns:1fr}}
 @media(max-width:450px){.utility-buttons{grid-template-columns:1fr}.record-actions button{flex:1}.metrics{grid-template-columns:1fr 1fr}.metrics>div{padding:13px}.metrics strong{font-size:1rem}}
+
+.glb-import input[type=file]{border:1px solid #48546f;background:#141b2d;color:#dce4f3;border-radius:10px;padding:11px;width:100%;font-size:.82rem}
+.import-status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:13px;padding:12px;background:#2b2b42;border-radius:10px;font-size:.8rem}

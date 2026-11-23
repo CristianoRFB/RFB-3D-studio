@@ -1,5 +1,7 @@
-import { Canvas } from '@react-three/fiber';
-import { Component, useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type WheelEvent } from 'react';
+import { Canvas, useLoader } from '@react-three/fiber';
+import { Box3, Mesh, MeshStandardMaterial, Vector3 } from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Component, Suspense, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type WheelEvent } from 'react';
 import { getProduct, type ProductId } from './catalog';
 import { clamp, COLORS, type StudioConfig } from './studio';
 
@@ -7,7 +9,7 @@ type Rot = { x: number; y: number };
 type Pan = { x: number; y: number };
 type Drag = { x: number; y: number; pan: boolean };
 type DisplayConfig = Pick<StudioConfig, 'colorId' | 'finishId'>;
-type Props = { config: DisplayConfig; productId: ProductId; sizeScale: number };
+type Props = { config: DisplayConfig; productId: ProductId; sizeScale: number; importUrl?: string | null };
 const DEFAULT_ROT = { x: 0.14, y: -0.35 };
 
 function supportsWebGL(): boolean {
@@ -45,13 +47,44 @@ function DemoModel({ config, productId, rot, pan, zoom, sizeScale }: Props & { r
   </group>;
 }
 
-function ThreeScene({ config, productId, sizeScale, rot, pan, zoom, lite }: Props & { rot: Rot; pan: Pan; zoom: number; lite: boolean }) {
+function ImportedModel({ url, config, rot, pan, zoom }: { url: string; config: DisplayConfig; rot: Rot; pan: Pan; zoom: number }) {
+  const { scene } = useLoader(GLTFLoader, url);
+  const model = useMemo(() => {
+    const copy = scene.clone(true);
+    const box = new Box3().setFromObject(copy);
+    const size = box.getSize(new Vector3());
+    const center = box.getCenter(new Vector3());
+    const max = Math.max(size.x, size.y, size.z, 0.001);
+    const scale = 2.5 / max;
+    copy.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+    copy.scale.setScalar(scale);
+    const color = COLORS.find(c => c.id === config.colorId)?.hex ?? COLORS[0].hex;
+    copy.traverse(obj => {
+      const mesh = obj as Mesh;
+      if (!mesh.isMesh) return;
+      mesh.material = new MeshStandardMaterial({ color,
+        metalness: config.finishId === 'metalico' ? .74 : .08,
+        roughness: config.finishId === 'metalico' ? .27 : .8 });
+    });
+    return copy;
+  }, [scene, config.colorId, config.finishId]);
+  useEffect(() => () => model.traverse(obj => {
+    const mesh = obj as Mesh;
+    if (mesh.isMesh && mesh.material instanceof MeshStandardMaterial) mesh.material.dispose();
+  }), [model]);
+  return <group rotation={[rot.x, rot.y, 0]} position={[pan.x, pan.y, 0]} scale={zoom}>
+    <primitive object={model} />
+  </group>;
+}
+
+function ThreeScene({ config, productId, sizeScale, importUrl, rot, pan, zoom, lite }: Props & { rot: Rot; pan: Pan; zoom: number; lite: boolean }) {
   return <Canvas frameloop="demand" camera={{ position: [0, 0, 5.6], fov: 44, near: .1, far: 100 }}
     dpr={[1, lite ? 1 : 1.75]} gl={{ antialias: !lite, alpha: true, powerPreference: lite ? 'low-power' : 'high-performance' }}>
     <ambientLight intensity={1.6} />
     <directionalLight position={[3, 5, 4]} intensity={3} />
     {!lite && <pointLight position={[-4, -2, 3]} color="#9A76FF" intensity={30} distance={12} />}
-    <DemoModel config={config} productId={productId} sizeScale={sizeScale} rot={rot} pan={pan} zoom={zoom} />
+    {importUrl ? <Suspense fallback={null}><ImportedModel url={importUrl} config={config} rot={rot} pan={pan} zoom={zoom}/></Suspense>
+      : <DemoModel config={config} productId={productId} sizeScale={sizeScale} rot={rot} pan={pan} zoom={zoom} />}
   </Canvas>;
 }
 class ViewerBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
@@ -86,7 +119,7 @@ function Fallback2D({ config, productId }: Props) {
   return <div className="fallback"><Preview2D productId={productId} colorId={config.colorId} /><span>Prévia 2D funcional · ilustração original</span></div>;
 }
 
-export default function Viewer3D({ config, productId, sizeScale }: Props) {
+export default function Viewer3D({ config, productId, sizeScale, importUrl }: Props) {
   const [rot, setRot] = useState<Rot>(DEFAULT_ROT);
   const [pan, setPan] = useState<Pan>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -139,9 +172,9 @@ export default function Viewer3D({ config, productId, sizeScale }: Props) {
       {fallback ? <Fallback2D config={config} productId={productId} sizeScale={sizeScale} /> :
         webgl === null ? <p className="scene-loading">Preparando visualizador...</p> :
         <ViewerBoundary fallback={<Fallback2D config={config} productId={productId} sizeScale={sizeScale} />}>
-          <ThreeScene config={config} productId={productId} sizeScale={sizeScale} rot={rot} pan={pan} zoom={zoom} lite={lite} />
+          <ThreeScene config={config} productId={productId} sizeScale={sizeScale} importUrl={importUrl} rot={rot} pan={pan} zoom={zoom} lite={lite} />
         </ViewerBoundary>}
-      <div className="scene-caption">{getProduct(productId).name.toUpperCase()} · GEOMETRIA ORIGINAL</div>
+      <div className="scene-caption">{importUrl ? 'ARQUIVO GLB LOCAL · PRÉVIA SEM COTAÇÃO' : getProduct(productId).name.toUpperCase() + ' · GEOMETRIA ORIGINAL'}</div>
     </div>
     <div className="scene-controls">
       <button type="button" className="secondary" onClick={() => setRot(r => ({ ...r, y: r.y - .3 }))} disabled={fallback} aria-label="Girar para a esquerda">←</button>
