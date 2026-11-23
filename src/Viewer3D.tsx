@@ -2,14 +2,14 @@ import { Canvas, useLoader } from '@react-three/fiber';
 import { Box3, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Component, Suspense, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type WheelEvent } from 'react';
-import { getProduct, type ProductId } from './catalog';
+import { getProduct, type AddonId, type ProductId } from './catalog';
 import { clamp, COLORS, type StudioConfig } from './studio';
 
 type Rot = { x: number; y: number };
 type Pan = { x: number; y: number };
 type Drag = { x: number; y: number; pan: boolean };
 type DisplayConfig = Pick<StudioConfig, 'colorId' | 'finishId'>;
-type Props = { config: DisplayConfig; productId: ProductId; sizeScale: number; importUrl?: string | null };
+type Props = { config: DisplayConfig; productId: ProductId; addonId?: AddonId; sizeScale: number; importUrl?: string | null };
 const DEFAULT_ROT = { x: 0.14, y: -0.35 };
 
 function supportsWebGL(): boolean {
@@ -18,7 +18,7 @@ function supportsWebGL(): boolean {
 }
 
 /** All geometry is original and programmatic. No third-party GLB, textures or fonts. */
-function DemoModel({ config, productId, rot, pan, zoom, sizeScale }: Props & { rot: Rot; pan: Pan; zoom: number }) {
+function DemoModel({ config, productId, addonId, rot, pan, zoom, sizeScale }: Props & { rot: Rot; pan: Pan; zoom: number }) {
   const paint = COLORS.find(c => c.id === config.colorId)?.hex ?? COLORS[0].hex;
   const metal = config.finishId === 'metalico';
   const material = { color: paint, metalness: metal ? 0.78 : 0.09, roughness: metal ? 0.24 : 0.83 };
@@ -30,6 +30,14 @@ function DemoModel({ config, productId, rot, pan, zoom, sizeScale }: Props & { r
       <mesh position={[0, 1.54, 0]}><cylinderGeometry args={[0.44, 0.44, 0.07, 40]} /><meshStandardMaterial color="#242e43" metalness={0.36} roughness={0.5} /></mesh>
       <mesh position={[0, -0.77, 0]}><cylinderGeometry args={[0.685, 0.685, 0.11, 40]} /><meshStandardMaterial color="#242e43" metalness={0.35} roughness={0.65} /></mesh>
       <mesh position={[0, 0.58, 0.66]}><boxGeometry args={[0.55, 0.13, 0.025]} /><meshStandardMaterial color="#f0f0fa" metalness={0.25} roughness={0.45} /></mesh>
+      {addonId === 'alca' && <mesh position={[0.70, 1.16, 0]} rotation={[0, 0, -0.28]}>
+        <torusGeometry args={[0.41, 0.095, 16, 52]} />
+        <meshStandardMaterial color="#d4e3f1" metalness={.45} roughness={.45} />
+      </mesh>}
+      {addonId === 'gravacao' && <mesh position={[0, 0.02, .685]}>
+        <boxGeometry args={[.58, .18, .024]} />
+        <meshStandardMaterial color="#fbf4d8" metalness={.18} roughness={.55} />
+      </mesh>}
     </>}
     {productId === 'orbita' && <>
       <mesh position={[0, -1.35, 0]}><cylinderGeometry args={[.88, .88, .15, 48]} /><meshStandardMaterial color="#262f45" metalness={.65} roughness={.38} /></mesh>
@@ -37,13 +45,29 @@ function DemoModel({ config, productId, rot, pan, zoom, sizeScale }: Props & { r
       <mesh position={[0, .40, 0]}><sphereGeometry args={[.83, 48, 32]} /><meshStandardMaterial {...material} /></mesh>
       <mesh position={[0, .40, 0]}><torusGeometry args={[.86, .056, 16, 64]} /><meshStandardMaterial color="#cdd5e2" metalness={.7} roughness={.25} /></mesh>
       <mesh position={[0, 1.23, 0]}><cylinderGeometry args={[.30, .39, .16, 32]} /><meshStandardMaterial color="#262f45" metalness={.6} roughness={.4} /></mesh>
-    </>}
+      {addonId === 'base' && <mesh position={[0, -1.43, 0]}>
+        <cylinderGeometry args={[1.04, 1.04, .13, 48]} />
+        <meshStandardMaterial color="#b5a6da" metalness={.47} roughness={.41} />
+      </mesh>}
+      {addonId === 'gravacao' && <mesh position={[0, .40, .82]}>
+        <boxGeometry args={[.44, .16, .03]} />
+        <meshStandardMaterial color="#fff3dc" metalness={.18} roughness={.6} />
+      </mesh>}
+    </>
     {productId === 'nexo' && <>
       <mesh position={[0, -.34, 0]}><cylinderGeometry args={[.77, .58, 1.93, 48, 1, true]} /><meshStandardMaterial {...material} side={2} /></mesh>
       <mesh position={[0, -.34, 0]}><cylinderGeometry args={[.70, .51, 1.90, 48]} /><meshStandardMaterial {...material} /></mesh>
       <mesh position={[0, .67, 0]}><torusGeometry args={[.765, .075, 16, 48]} /><meshStandardMaterial {...material} /></mesh>
       <mesh position={[0, -1.31, 0]}><cylinderGeometry args={[.54, .54, .12, 48]} /><meshStandardMaterial color="#303a51" roughness={.7} /></mesh>
-    </>}
+      {addonId === 'suporte' && <group position={[0, -1.34, 0]}>
+        <mesh><cylinderGeometry args={[.87, .87, .11, 48]} /><meshStandardMaterial color="#b5bccd" metalness={.64} roughness={.38} /></mesh>
+        <mesh position={[0, -.12, 0]}><cylinderGeometry args={[.65, .65, .16, 48]} /><meshStandardMaterial color="#394157" roughness={.5} /></mesh>
+      </group>}
+      {addonId === 'gravacao' && <mesh position={[0, -.08, .726]}>
+        <boxGeometry args={[.57, .18, .028]} />
+        <meshStandardMaterial color="#faf3e8" roughness={.64} />
+      </mesh>}
+    </>
   </group>;
 }
 
@@ -77,14 +101,14 @@ function ImportedModel({ url, config, rot, pan, zoom }: { url: string; config: D
   </group>;
 }
 
-function ThreeScene({ config, productId, sizeScale, importUrl, rot, pan, zoom, lite }: Props & { rot: Rot; pan: Pan; zoom: number; lite: boolean }) {
+function ThreeScene({ config, productId, addonId, sizeScale, importUrl, rot, pan, zoom, lite }: Props & { rot: Rot; pan: Pan; zoom: number; lite: boolean }) {
   return <Canvas frameloop="demand" camera={{ position: [0, 0, 5.6], fov: 44, near: .1, far: 100 }}
-    dpr={[1, lite ? 1 : 1.75]} gl={{ antialias: !lite, alpha: true, powerPreference: lite ? 'low-power' : 'high-performance' }}>
+    dpr={[1, lite ? 1 : 1.75]} gl={{ antialias: !lite, alpha: true, preserveDrawingBuffer: true, powerPreference: lite ? 'low-power' : 'high-performance' }}>
     <ambientLight intensity={1.6} />
     <directionalLight position={[3, 5, 4]} intensity={3} />
     {!lite && <pointLight position={[-4, -2, 3]} color="#9A76FF" intensity={30} distance={12} />}
     {importUrl ? <Suspense fallback={null}><ImportedModel url={importUrl} config={config} rot={rot} pan={pan} zoom={zoom}/></Suspense>
-      : <DemoModel config={config} productId={productId} sizeScale={sizeScale} rot={rot} pan={pan} zoom={zoom} />}
+      : <DemoModel config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} rot={rot} pan={pan} zoom={zoom} />}
   </Canvas>;
 }
 class ViewerBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
@@ -92,7 +116,7 @@ class ViewerBoundary extends Component<{ fallback: ReactNode; children: ReactNod
   static getDerivedStateFromError(): { failed: boolean } { return { failed: true }; }
   render() { return this.state.failed ? this.props.fallback : this.props.children; }
 }
-export function Preview2D({ productId, colorId }: { productId: ProductId; colorId: DisplayConfig['colorId'] }) {
+export function Preview2D({ productId, colorId, addonId }: { productId: ProductId; colorId: DisplayConfig['colorId']; addonId?: AddonId }) {
   const fill = COLORS.find(c => c.id === colorId)?.hex ?? COLORS[0].hex;
   return <svg className="product-svg" viewBox="0 0 280 330" role="img" aria-label={'Ilustração 2D: ' + getProduct(productId).name}>
     <ellipse cx="140" cy="301" rx="78" ry="11" fill="#080e1d" opacity=".45" />
@@ -113,13 +137,17 @@ export function Preview2D({ productId, colorId }: { productId: ProductId; colorI
       <ellipse cx="140" cy="81" rx="68" ry="17" fill="#2e3650" stroke={fill} strokeWidth="10" />
       <path d="M89 124L102 267" stroke="#fff" strokeOpacity=".22" strokeWidth="10" strokeLinecap="round" />
     </>}
+    {addonId === 'alca' && productId === 'aura' && <ellipse cx="194" cy="112" rx="34" ry="47" fill="none" stroke="#cbd7e7" strokeWidth="13"/>}
+    {addonId === 'base' && productId === 'orbita' && <ellipse cx="140" cy="290" rx="82" ry="20" fill="none" stroke="#aa9fc6" strokeWidth="10"/>}
+    {addonId === 'suporte' && productId === 'nexo' && <rect x="65" y="280" width="150" height="18" rx="8" fill="#afb8d1"/>}
+    {addonId === 'gravacao' && <rect x="107" y="194" width="66" height="16" rx="4" fill="#fff4dc"/>}
   </svg>;
 }
-function Fallback2D({ config, productId }: Props) {
-  return <div className="fallback"><Preview2D productId={productId} colorId={config.colorId} /><span>Prévia 2D funcional · ilustração original</span></div>;
+function Fallback2D({ config, productId, addonId }: Props) {
+  return <div className="fallback"><Preview2D productId={productId} colorId={config.colorId} addonId={addonId} /><span>Prévia 2D funcional · ilustração original</span></div>;
 }
 
-export default function Viewer3D({ config, productId, sizeScale, importUrl }: Props) {
+export default function Viewer3D({ config, productId, addonId, sizeScale, importUrl }: Props) {
   const [rot, setRot] = useState<Rot>(DEFAULT_ROT);
   const [pan, setPan] = useState<Pan>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -127,8 +155,34 @@ export default function Viewer3D({ config, productId, sizeScale, importUrl }: Pr
   const [twoD, setTwoD] = useState(false);
   const [webgl, setWebgl] = useState<boolean | null>(null);
   const drag = useRef<Drag | null>(null);
+  const sceneElement = useRef<HTMLDivElement | null>(null);
+  const [exportMessage, setExportMessage] = useState('');
   useEffect(() => { setWebgl(supportsWebGL()); }, []);
+  useEffect(() => {
+    if (webgl !== true || twoD) return;
+    const canvas = sceneElement.current?.querySelector('canvas');
+    if (!canvas) return;
+    const onLoss = (event: Event) => { event.preventDefault(); drag.current = null; setWebgl(false); };
+    canvas.addEventListener('webglcontextlost', onLoss);
+    return () => canvas.removeEventListener('webglcontextlost', onLoss);
+  }, [webgl, twoD]);
   const fallback = twoD || webgl === false;
+  const savePNG = () => {
+    setExportMessage('');
+    const canvas = sceneElement.current?.querySelector('canvas');
+    if (!canvas || fallback) { setExportMessage('O render 3D não está disponível para exportação.'); return; }
+    canvas.toBlob(blob => {
+      if (!blob || blob.size === 0) { setExportMessage('Não foi possível capturar o render 3D.'); return; }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'rfb-studio-render-3d.png';
+      document.body.append(link);
+      link.click(); link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setExportMessage('Imagem PNG capturada do visualizador 3D.');
+    }, 'image/png');
+  };
   const resetCamera = () => { setRot(DEFAULT_ROT); setPan({ x: 0, y: 0 }); setZoom(1); };
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0 || fallback) return;
@@ -164,15 +218,15 @@ export default function Viewer3D({ config, productId, sizeScale, importUrl }: Pr
   return <section className="viewer" aria-label={'Personalização visual de ' + getProduct(productId).name}>
     <div className="viewer-head"><span className="viewer-kicker">01 / VISUALIZADOR</span>
       <span className="viewer-tag">{fallback ? 'MODO 2D' : webgl === null ? 'PREPARANDO...' : 'WEBGL INTERATIVO'}</span></div>
-    <div className={'scene ' + (fallback ? 'scene-2d' : '')} role="group" tabIndex={0}
+    <div ref={sceneElement} className={'scene ' + (fallback ? 'scene-2d' : '')} role="group" tabIndex={0}
       aria-label="Visualizador. Setas giram o produto; Shift e setas movem; mais e menos aproximam; zero restaura."
       onPointerDown={onPointerDown} onPointerMove={onPointerMove}
       onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}
       onKeyDown={onKeyDown} onWheel={onWheel}>
-      {fallback ? <Fallback2D config={config} productId={productId} sizeScale={sizeScale} /> :
+      {fallback ? <Fallback2D config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} /> :
         webgl === null ? <p className="scene-loading">Preparando visualizador...</p> :
         <ViewerBoundary fallback={<Fallback2D config={config} productId={productId} sizeScale={sizeScale} />}>
-          <ThreeScene config={config} productId={productId} sizeScale={sizeScale} importUrl={importUrl} rot={rot} pan={pan} zoom={zoom} lite={lite} />
+          <ThreeScene config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} importUrl={importUrl} rot={rot} pan={pan} zoom={zoom} lite={lite} />
         </ViewerBoundary>}
       <div className="scene-caption">{importUrl ? 'ARQUIVO GLB LOCAL · PRÉVIA SEM COTAÇÃO' : getProduct(productId).name.toUpperCase() + ' · GEOMETRIA ORIGINAL'}</div>
     </div>
@@ -182,11 +236,13 @@ export default function Viewer3D({ config, productId, sizeScale, importUrl }: Pr
       <button type="button" className="secondary" onClick={() => setZoom(z => clamp(z + .12, .65, 1.6))} disabled={fallback} aria-label="Aproximar">+</button>
       <button type="button" className="secondary" onClick={() => setZoom(z => clamp(z - .12, .65, 1.6))} disabled={fallback} aria-label="Afastar">−</button>
       <button type="button" className="secondary" onClick={resetCamera} disabled={fallback}>Restaurar vista</button>
+      <button type="button" className="secondary" onClick={savePNG} disabled={fallback}>Exportar render 3D PNG</button>
     </div>
     <div className="viewer-modes">
       <label><input type="checkbox" checked={lite} onChange={e => setLite(e.target.checked)} /> Qualidade reduzida</label>
       <label><input type="checkbox" checked={twoD} onChange={e => setTwoD(e.target.checked)} /> Prévia 2D</label>
     </div>
+    {exportMessage && <p role="status" className="hint">{exportMessage}</p>}
     <p className="hint">{fallback ? 'Prévia 2D disponível quando WebGL falha ou por escolha do usuário.' : 'Arraste para girar. Shift + arrastar para mover. Role para zoom. Teclado: setas, Shift+setas, +, -, 0.'}</p>
   </section>;
 }

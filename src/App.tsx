@@ -160,7 +160,7 @@ export default function App() {
       </div>
       {alert && <p className="feedback" role="status">{alert}</p>}
       {tab === 'studio' && <div className="studio-grid">
-        <Viewer3D config={design} productId={design.productId} sizeScale={size.scale} importUrl={importUrl} />
+        <Viewer3D config={design} productId={design.productId} addonId={design.addonId} sizeScale={size.scale} importUrl={importUrl} />
         <aside className="customizer" aria-label="Personalização do produto">
           <div className="panel-head"><span className="viewer-kicker">02 / PERSONALIZAR</span><span className="panel-counter">CATÁLOGO DEMO</span></div>
           <h2>{currentProduct.name}</h2>

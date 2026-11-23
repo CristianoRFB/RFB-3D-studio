@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 
 test('WebGL: modelo procedural, câmera por teclado e fallback 2D', async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -27,6 +27,15 @@ test('WebGL: modelo procedural, câmera por teclado e fallback 2D', async ({ pag
   await page.waitForTimeout(150);
   const changed = await canvas.screenshot();
   expect(after.equals(changed)).toBe(false);
+  await page.getByLabel('Acessório / personalização').selectOption('alca');
+  await page.waitForTimeout(130);
+  const accessory = await canvas.screenshot();
+  expect(accessory.equals(changed)).toBe(false);
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar render 3D PNG' }).click();
+  const png = await downloadPromise;
+  expect(png.suggestedFilename()).toBe('rfb-studio-render-3d.png');
+  await expect(page.getByRole('status').filter({ hasText: 'Imagem PNG capturada' })).toBeVisible();
   await page.screenshot({ path: 'artifacts/rfb-studio-webgl-swiftshader.png', fullPage: true });
   await page.getByRole('checkbox', { name: 'Prévia 2D' }).check();
   await expect(page.getByText('MODO 2D')).toBeVisible();
