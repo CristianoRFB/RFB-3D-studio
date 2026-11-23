@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run tests",
     "e2e": "playwright test",
-    "rules:test": "firebase emulators:exec --only firestore --project demo-rfb-studio-tests \"node tests/firestore.rules.mjs\""
+    "rules:test": "firebase emulators:exec --only firestore --project demo-rfb-studio-tests \"node tests/firestore.rules.mjs\"",
+    "perf:budget": "node scripts/check-bundle.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.8.0",

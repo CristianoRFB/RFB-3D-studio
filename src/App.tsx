@@ -44,7 +44,16 @@ function previewSVG(config: DesignConfig): string {
     : config.productId === 'orbita'
       ? '<rect x="126" y="170" width="28" height="114" fill="' + fill + '"/><ellipse cx="140" cy="286" rx="66" ry="13" fill="#353c55"/><circle cx="140" cy="113" r="80" fill="' + fill + '" stroke="#e5e9f1" stroke-width="6"/>'
       : '<path d="M72 83Q83 217 90 283Q140 313 190 283Q197 217 208 83Z" fill="' + fill + '" stroke="#e9e5ff" stroke-width="3"/><ellipse cx="140" cy="83" rx="68" ry="17" fill="#303950" stroke="' + fill + '" stroke-width="10"/>';
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 330" width="560" height="660"><rect width="280" height="330" fill="#182039"/>' + image + '</svg>';
+  const accessory = config.addonId === 'alca' && config.productId === 'aura'
+    ? '<ellipse cx="194" cy="112" rx="34" ry="47" fill="none" stroke="#cbd7e7" stroke-width="13"/>'
+    : config.addonId === 'base' && config.productId === 'orbita'
+      ? '<ellipse cx="140" cy="290" rx="82" ry="20" fill="none" stroke="#aa9fc6" stroke-width="10"/>'
+      : config.addonId === 'suporte' && config.productId === 'nexo'
+        ? '<rect x="65" y="280" width="150" height="18" rx="8" fill="#afb8d1"/>'
+        : config.addonId === 'gravacao'
+          ? '<rect x="107" y="194" width="66" height="16" rx="4" fill="#fff4dc"/>'
+          : '';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 330" width="560" height="660"><rect width="280" height="330" fill="#182039"/>' + image + accessory + '</svg>';
 }
 function today() { return new Date().toISOString(); }
 

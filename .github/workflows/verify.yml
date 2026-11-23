@@ -21,6 +21,8 @@ jobs:
         run: npm run test
       - name: Build Vite
         run: npm run build
+      - name: Verificar tamanho dos bundles de produção
+        run: npm run perf:budget
       - name: Auditar dependências de produção
         run: npm audit --omit=dev --audit-level=high
       - uses: actions/setup-java@v4

@@ -133,3 +133,16 @@ test('privacidade: backup local, exclusão confirmada, importação e aviso offl
   await page.context().setOffline(false);
   await expect(page.getByText('Sem conexão:', { exact: false })).toHaveCount(0);
 });
+
+test('exportação SVG 2D preserva o acessório selecionado', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Acessório / personalização').selectOption('alca');
+  const pending = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Baixar prévia 2D SVG' }).click();
+  const artifact = await pending;
+  expect(artifact.suggestedFilename()).toBe('rfb-studio-previa-2d.svg');
+  const { readFile } = await import('node:fs/promises');
+  const svg = (await readFile(await artifact.path())).toString();
+  expect(svg).toContain('<ellipse cx="194" cy="112"');
+  expect(svg).toContain('viewBox="0 0 280 330"');
+});
