@@ -36,8 +36,10 @@ async function verifyFirebase(token: string, project: string): Promise<string> {
     audience: project, issuer: 'https://securetoken.google.com/' + project,
     algorithms: ['RS256'], maxTokenAge: '1 hour',
   });
+  const provider = payload.firebase && typeof payload.firebase === 'object'
+    ? (payload.firebase as { sign_in_provider?: unknown }).sign_in_provider : undefined;
   if (typeof payload.sub !== 'string' || !VALID_UID.test(payload.sub) || payload.sub.length > 128
-      || payload.firebase?.sign_in_provider === 'anonymous') throw new Error('INVALID_IDENTITY');
+      || provider === 'anonymous') throw new Error('INVALID_IDENTITY');
   return payload.sub;
 }
 async function serviceToken(env: QuoteEnv): Promise<string> {
