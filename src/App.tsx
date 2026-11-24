@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { Component, lazy, Suspense, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 const CloudWorkspace = lazy(() => import('./cloud/CloudWorkspace'));
 import { PRESETS } from './presets';
 import { decodeBackup, encodeBackup } from './backup';
@@ -20,6 +20,13 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'studio', label: 'Estúdio' }, { id: 'catalogo', label: 'Catálogo' }, { id: 'presets', label: 'Presets' }, { id: 'designs', label: 'Meus designs' },
   { id: 'carrinho', label: 'Carrinho' }, { id: 'orcamentos', label: 'Orçamentos' }, { id: 'painel', label: 'Painel demo' }, { id: 'nuvem', label: 'Minha conta' }, { id: 'privacidade', label: 'Privacidade' }, { id: 'ajuda', label: 'Ajuda' },
 ];
+
+/** Handles module fetch errors before the Three.js engine is available. */
+class ViewerImportBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError(): { failed: boolean } { return { failed: true }; }
+  render() { return this.state.failed ? this.props.fallback : this.props.children; }
+}
 
 function initialDesign(): DesignConfig {
   try {
@@ -203,9 +210,16 @@ function StudioApp() {
       {!online && <p role="status" className="feedback">Sem conexão: o estúdio local continua disponível, mas autenticação e sincronização na nuvem podem falhar.</p>}
       {alert && <p className="feedback" role="status">{alert}</p>}
       {tab === 'studio' && <div className="studio-grid">
-        <Suspense fallback={<section className="viewer" role="status" aria-label="Carregando prévia 3D"><p className="scene-loading">Carregando visualizador 3D...</p></section>}>
-          <Viewer3D config={design} productId={design.productId} addonId={design.addonId} sizeScale={size.scale} importUrl={importUrl} />
-        </Suspense>
+        <ViewerImportBoundary fallback={<section className="viewer" aria-label="Visualizador 2D após falha do módulo 3D">
+          <div className="viewer-head"><span className="viewer-kicker">PRÉVIA 2D</span><span className="viewer-tag">FALHA NO CARREGAMENTO 3D</span></div>
+          <div className="fallback"><Preview2D productId={design.productId} colorId={design.colorId} addonId={design.addonId} /></div>
+          <p className="hint">O módulo 3D não foi carregado. A prévia 2D permanece disponível; verifique a conexão e recarregue a página.</p>
+          <button type="button" className="secondary" onClick={() => window.location.reload()}>Recarregar visualizador</button>
+        </section>}>
+          <Suspense fallback={<section className="viewer" role="status" aria-label="Carregando prévia 3D"><p className="scene-loading">Carregando visualizador 3D...</p></section>}>
+            <Viewer3D config={design} productId={design.productId} addonId={design.addonId} sizeScale={size.scale} importUrl={importUrl} />
+          </Suspense>
+        </ViewerImportBoundary>
         <aside className="customizer" aria-label="Personalização do produto">
           <div className="panel-head"><span className="viewer-kicker">02 / PERSONALIZAR</span><span className="panel-counter">CATÁLOGO DEMO</span></div>
           <h2>{currentProduct.name}</h2>

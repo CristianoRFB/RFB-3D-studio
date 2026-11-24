@@ -202,3 +202,11 @@ test('resumo de orçamento oferece apenas rascunho mailto sem destinatário', as
   expect(parsed.pathname).toBe('');
   expect(parsed.searchParams.get('body')).toContain('SIMULAÇÃO SEM VALIDADE COMERCIAL');
 });
+
+test('falha ao buscar o módulo 3D preserva a prévia 2D e informa recuperação', async ({ page }) => {
+  await page.route(/\/src\/Viewer3D\.tsx(?:\?|$)/, route => route.abort('failed'));
+  await page.goto('/');
+  await expect(page.getByText('FALHA NO CARREGAMENTO 3D')).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Ilustração 2D: Garrafa Aura' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Recarregar visualizador' })).toBeVisible();
+});
