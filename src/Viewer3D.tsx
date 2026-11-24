@@ -241,7 +241,7 @@ export default function Viewer3D({ config, productId, addonId, sizeScale, import
       <button type="button" className="secondary" onClick={() => setZoom(z => clamp(z - .12, .65, 1.6))} disabled={fallback} aria-label="Afastar">−</button>
       <button type="button" className="secondary" onClick={resetCamera} disabled={fallback}>Restaurar vista</button>
       <button type="button" className="secondary" onClick={savePNG} disabled={fallback}>Exportar render 3D PNG</button>
-      {(renderFailed || webgl === false) && <button type="button" onClick={retry3D}>Tentar 3D novamente</button>
+      {(renderFailed || webgl === false) && <button type="button" onClick={retry3D}>Tentar 3D novamente</button>}
     </div>
     <div className="viewer-modes">
       <label><input type="checkbox" checked={lite} onChange={e => setLite(e.target.checked)} /> Qualidade reduzida</label>
