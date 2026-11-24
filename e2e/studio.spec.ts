@@ -173,3 +173,19 @@ test('marca própria: favicon e ícone SVG internos sem marca de terceiros', asy
   expect(response.ok()).toBeTruthy();
   expect(await response.text()).toContain('Ícone RFBStudio');
 });
+
+test('Ajuda: instruções honestas de 3D, privacidade e ausência de compra', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Seções do estúdio' }).getByRole('button', { name: 'Ajuda' }).click();
+  await expect(page.getByRole('heading', { name: 'Como usar o RFB Studio' })).toBeVisible();
+  await page.getByText('Posso comprar ou enviar pedidos?').click();
+  await expect(page.getByText('Não. Carrinho e orçamentos são simulações', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Voltar ao estúdio' }).click();
+  await expect(page.getByRole('heading', { name: 'Garrafa Aura' })).toBeVisible();
+});
+test('404: navegação para URL inexistente informa erro sem inventar recurso', async ({ page }) => {
+  await page.goto('/recurso-inexistente-teste');
+  await expect(page.getByRole('heading', { name: 'Página não encontrada' })).toBeVisible();
+  await page.getByRole('link', { name: 'Voltar ao início' }).click();
+  await expect(page.getByRole('heading', { name: 'Garrafa Aura' })).toBeVisible();
+});

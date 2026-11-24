@@ -116,3 +116,12 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{o
 
 .brand{display:inline-flex;align-items:center;gap:5px}
 .brand-icon{display:inline-block;flex:none;border-radius:8px;margin-right:7px}
+
+.help-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px;margin:22px 0}
+.help-grid details{background:#1b2540;border:1px solid #3c4968;border-radius:12px;padding:14px 16px}
+.help-grid summary{cursor:pointer;font-weight:700}
+.help-grid p{color:#d7dcef;line-height:1.55;font-size:.91rem}
+.route-error{padding:clamp(24px,9vw,100px) 24px;max-width:800px;margin:10vh auto;color:#f5f4ff}
+.route-error h1{font-size:clamp(2rem,6vw,4rem)}
+.route-error a{display:inline-block;padding:12px 18px;border-radius:10px;background:#a98ef0;color:#10131a;font-weight:800;text-decoration:none}
+.route-error a:focus-visible{outline:3px solid #fff;outline-offset:4px}

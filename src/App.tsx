@@ -15,10 +15,10 @@ import { EMPTY_WORKSPACE, STORE_KEY, addCart, createId, createQuote, encodeWorks
 const STEP_KEY = 'rfb:' + product.slug + ':starter-step';
 const DESIGN_KEY = 'rfbstudio:design:v2';
 const LAST_STEP = product.steps.length - 1;
-type Tab = 'studio' | 'catalogo' | 'presets' | 'designs' | 'carrinho' | 'orcamentos' | 'painel' | 'nuvem' | 'privacidade';
+type Tab = 'studio' | 'catalogo' | 'presets' | 'designs' | 'carrinho' | 'orcamentos' | 'painel' | 'nuvem' | 'privacidade' | 'ajuda';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'studio', label: 'Estúdio' }, { id: 'catalogo', label: 'Catálogo' }, { id: 'presets', label: 'Presets' }, { id: 'designs', label: 'Meus designs' },
-  { id: 'carrinho', label: 'Carrinho' }, { id: 'orcamentos', label: 'Orçamentos' }, { id: 'painel', label: 'Painel demo' }, { id: 'nuvem', label: 'Minha conta' }, { id: 'privacidade', label: 'Privacidade' },
+  { id: 'carrinho', label: 'Carrinho' }, { id: 'orcamentos', label: 'Orçamentos' }, { id: 'painel', label: 'Painel demo' }, { id: 'nuvem', label: 'Minha conta' }, { id: 'privacidade', label: 'Privacidade' }, { id: 'ajuda', label: 'Ajuda' },
 ];
 
 function initialDesign(): DesignConfig {
@@ -59,7 +59,7 @@ function previewSVG(config: DesignConfig): string {
 }
 function today() { return new Date().toISOString(); }
 
-export default function App() {
+function StudioApp() {
   const [tab, setTab] = useState<Tab>('studio');
   const [cloudVisited, setCloudVisited] = useState(false);
   const [design, setDesign] = useState<DesignConfig>(initialDesign);
@@ -371,6 +371,25 @@ export default function App() {
         </div>
         <div className="empty-state">Para implementar um painel de vendas real será necessária autenticação, autorização por vendedor/tenant, backend de preço e Firestore Rules testadas. Nada disso é simulado como produção.</div>
       </section>}
+      {tab === 'ajuda' && <section className="content-card" aria-label="Ajuda e funcionamento do estúdio">
+        <div className="section-head"><div><p className="viewer-kicker">CENTRAL DE AJUDA</p><h2>Como usar o RFB Studio</h2></div><span className="viewer-tag">GUIA DA DEMONSTRAÇÃO</span></div>
+        <p className="helper">Comece no catálogo ou no estúdio, escolha um dos três produtos autorais, configure cor, acabamento, tamanho e acessório. O preço mostrado é ilustrativo e muda junto com as opções permitidas.</p>
+        <div className="help-grid">
+          <details open><summary>Como movimentar o produto 3D?</summary>
+            <p>Arraste para girar. Segure Shift e arraste para mover. Role o mouse para aproximar. Teclado: setas giram, Shift + setas move, + e − dão zoom, 0 restaura.</p></details>
+          <details><summary>O que fazer se o 3D não abrir?</summary>
+            <p>O aplicativo usa prévia SVG 2D quando WebGL não funciona ou um modelo falha. Na área do visualizador, tente novamente com o botão de recuperação quando disponível. Ative qualidade reduzida em dispositivos limitados.</p></details>
+          <details><summary>Onde estão meus designs?</summary>
+            <p>Em Meus designs, os registros são locais deste navegador. Em Minha conta, a sincronização só aparece após um projeto Firebase autorizado ser configurado. Sem Firebase, não existe conta remota.</p></details>
+          <details><summary>Posso salvar ou apagar meus dados?</summary>
+            <p>Na seção Privacidade, exporte um backup JSON, restaure os registros ou exclua os dados locais com confirmação. Exclusões locais não apagam documentos eventualmente salvos na nuvem.</p></details>
+          <details><summary>Posso comprar ou enviar pedidos?</summary>
+            <p>Não. Carrinho e orçamentos são simulações sem valor jurídico/comercial. O resumo TXT pode ser baixado para uso manual, mas o aplicativo não envia mensagens nem cobra pagamentos.</p></details>
+          <details><summary>Posso importar meu modelo 3D?</summary>
+            <p>É possível visualizar um GLB local glTF 2.0 de até 8 MB com estrutura válida. Ele não é salvo na conta, enviado ao servidor ou vendido. Utilize somente arquivos próprios/licenciados.</p></details>
+        </div>
+        <button type="button" className="secondary" onClick={() => setTab('studio')}>Voltar ao estúdio</button>
+      </section>}
       {tab === 'privacidade' && <section className="content-card" aria-label="Privacidade e dados locais">
         <div className="section-head"><div><p className="viewer-kicker">CONTROLE DO USUÁRIO</p><h2>Privacidade e dados</h2></div><span className="viewer-tag">SOMENTE NESTE NAVEGADOR</span></div>
         <p className="helper">Designs locais, carrinho e simulações ficam armazenados no navegador sem conta. Você pode fazer um backup JSON, restaurá-lo ou apagar esses registros. A operação não envia dados para serviços externos.</p>
@@ -425,4 +444,17 @@ export default function App() {
     </main>
     <footer className="footer">RFB Method · Catálogo {CATALOG_VERSION} · Dados sintéticos · Nenhum deploy comprovado</footer>
   </div>;
+}
+
+/** Single route app: unknown paths do not pretend to contain a resource. */
+export default function App() {
+  const path = window.location.pathname;
+  if (path === '/' || path === '/index.html') return <StudioApp />;
+  return <main className="route-error" id="conteudo">
+    <img src="/brand/icone.svg" width="64" height="64" alt="" />
+    <p className="viewer-kicker">RFB STUDIO / 404</p>
+    <h1>Página não encontrada</h1>
+    <p>O endereço solicitado não existe nesta demonstração. Nenhum registro local foi removido.</p>
+    <a href="/">Voltar ao início</a>
+  </main>;
 }
