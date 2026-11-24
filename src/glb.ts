@@ -22,6 +22,49 @@ export function inspectGLB(buffer: ArrayBuffer): { meshCount: number } {
   if (!Array.isArray(root.accessors) || !Array.isArray(root.bufferViews) || !Array.isArray(root.buffers) || root.buffers.length < 1) {
     throw new Error('GLB precisa conter accessors, bufferViews e buffers');
   }
+  // GLB byte length alone does not limit decoded GPU memory or malformed scene graphs.
+  const limits: Record<string,number> = {
+    nodes: 256, accessors: 512, bufferViews: 512, buffers: 8,
+    images: 12, textures: 12, materials: 32, animations: 16, skins: 8,
+  };
+  for (const [name, max] of Object.entries(limits)) {
+    const group = root[name];
+    if (group !== undefined && (!Array.isArray(group) || group.length > max))
+      throw new Error('Limite de complexidade GLB excedido: ' + name);
+  }
+  let primitives = 0;
+  let totalVertices = 0;
+  for (const mesh of root.meshes) {
+    primitives += mesh?.primitives?.length ?? 0;
+    if (primitives > 128) throw new Error('GLB contém primitivas demais para a prévia');
+    for (const primitive of mesh?.primitives ?? []) {
+      const position = root.accessors[primitive?.attributes?.POSITION];
+      const vertexCount = position?.count;
+      if (!Number.isInteger(vertexCount) || vertexCount <= 0 ||
+          vertexCount > 250000 || !Number.isInteger(position?.bufferView) ||
+          position.bufferView < 0 || position.bufferView >= root.bufferViews.length)
+        throw new Error('Geometria GLB com quantidade de vértices ou buffer inválidos');
+      totalVertices += vertexCount;
+      if (totalVertices > 350000) throw new Error('Geometria GLB complexa demais para esta demo');
+    }
+  }
+  if (Array.isArray(root.nodes)) {
+    const parents = new Array<number>(root.nodes.length).fill(0);
+    const links = root.nodes.map(node => Array.isArray(node?.children) ? node.children : []);
+    for (const children of links) for (const child of children) {
+      if (!Number.isInteger(child) || child < 0 || child >= links.length || ++parents[child] > 1)
+        throw new Error('Hierarquia GLB inválida');
+    }
+    const state = new Array<number>(links.length).fill(0);
+    function walk(id: number): void {
+      if (state[id] === 1) throw new Error('Ciclo detectado na hierarquia do GLB');
+      if (state[id] === 2) return;
+      state[id] = 1;
+      for (const child of links[id]) walk(child);
+      state[id] = 2;
+    }
+    for (let i = 0; i < links.length; i++) walk(i);
+  }
   for (const mesh of root.meshes) {
     if (!mesh || typeof mesh !== 'object' || !Array.isArray(mesh.primitives) || mesh.primitives.length < 1) {
       throw new Error('Malha GLB sem primitivas');
@@ -40,7 +83,10 @@ export function inspectGLB(buffer: ArrayBuffer): { meshCount: number } {
     for (const entry of group) {
       if (!entry || typeof entry !== 'object') continue;
       const uri = (entry as Record<string, unknown>).uri;
-      if (typeof uri === 'string' && !uri.startsWith('data:')) throw new Error('Referências externas em GLB são proibidas');
+      if (typeof uri === 'string') {
+        if (!/^data:(?:application\/octet-stream|image\/(?:png|jpeg|webp));base64,/i.test(uri))
+          throw new Error('Referências externas ou formatos URI não suportados em GLB');
+      }
     }
   }
   const jsonEnd = 20 + jsonLength;

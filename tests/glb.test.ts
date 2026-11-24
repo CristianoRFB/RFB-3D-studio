@@ -19,3 +19,44 @@ describe('validação de GLB local', () => {
     expect(() => inspectGLB(broken.buffer as ArrayBuffer)).toThrow();
   });
 });
+
+/** Rebuild the original GLB with altered JSON metadata but identical binary geometry. */
+function mutateGLB(change: (root: Record<string, any>) => void): ArrayBuffer {
+  const original = createTriangleGLB();
+  const view = new DataView(original.buffer);
+  const jsonLength = view.getUint32(12, true);
+  const root = JSON.parse(new TextDecoder().decode(original.slice(20, 20 + jsonLength))) as Record<string, any>;
+  change(root);
+  const encoded = new TextEncoder().encode(JSON.stringify(root));
+  const padded = (encoded.length + 3) & ~3;
+  const binaryStart = 20 + jsonLength;
+  const binary = original.slice(binaryStart);
+  const bytes = new Uint8Array(20 + padded + binary.byteLength);
+  const result = new DataView(bytes.buffer);
+  result.setUint32(0, 0x46546c67, true); result.setUint32(4, 2, true);
+  result.setUint32(8, bytes.byteLength, true);
+  result.setUint32(12, padded, true); result.setUint32(16, 0x4e4f534a, true);
+  bytes.fill(32, 20, 20 + padded); bytes.set(encoded, 20);
+  bytes.set(binary, 20 + padded);
+  return bytes.buffer;
+}
+describe('proteções da prévia GLB contra complexidade e referências inseguras', () => {
+  it('recusa vértices declarados acima do limite e bufferView inconsistente', () => {
+    expect(() => inspectGLB(mutateGLB(g => {g.accessors[0].count = 9999999}))).toThrow(/vértices|complexa/);
+    expect(() => inspectGLB(mutateGLB(g => {g.accessors[0].bufferView = 900}))).toThrow(/buffer/);
+  });
+  it('recusa explosões de malhas, primitivas, materiais e imagens', () => {
+    expect(() => inspectGLB(mutateGLB(g => {g.meshes[0].primitives = Array.from({length:130},()=>g.meshes[0].primitives[0])}))).toThrow();
+    expect(() => inspectGLB(mutateGLB(g => {g.materials = Array.from({length:34},()=>({}))}))).toThrow();
+    expect(() => inspectGLB(mutateGLB(g => {g.images = Array.from({length:20},()=>({}))}))).toThrow();
+  });
+  it('recusa nó autocíclico, filhos repetidos ou fora do grafo', () => {
+    expect(() => inspectGLB(mutateGLB(g => {g.nodes[0].children = [0]}))).toThrow(/Ciclo/);
+    expect(() => inspectGLB(mutateGLB(g => {g.nodes[0].children = [1]}))).toThrow(/Hierarquia/);
+    expect(() => inspectGLB(mutateGLB(g => {g.nodes.push({mesh:0});g.nodes[0].children=[1,1]}))).toThrow(/Hierarquia/);
+  });
+  it('recusa links externos e data-URIs com MIME perigoso', () => {
+    expect(() => inspectGLB(mutateGLB(g => {g.buffers[0].uri = 'https://evil.invalid/a.bin'}))).toThrow(/Referências/);
+    expect(() => inspectGLB(mutateGLB(g => {g.images = [{uri:'data:text/html;base64,PGgxPg=='}]}))).toThrow(/URI/);
+  });
+});
