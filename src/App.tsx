@@ -5,7 +5,8 @@ import { decodeBackup, encodeBackup } from './backup';
 import { quoteSummaryText } from './quote-summary';
 import { inspectGLB } from './glb';
 import product from './product.json';
-import Viewer3D, { Preview2D } from './Viewer3D';
+import { Preview2D } from './Preview2D';
+const Viewer3D = lazy(() => import('./Viewer3D'));
 import { clampStep, nextStep, prevStep } from './flow';
 import { COLORS, DEFAULT_CONFIG, FINISHES } from './studio';
 import { CATALOG_VERSION, INITIAL_DESIGN, PRODUCTS, brl, chooseProduct, getProduct, normalizeDesign, quoteLine, type DesignConfig } from './catalog';
@@ -202,7 +203,9 @@ export default function App() {
       {!online && <p role="status" className="feedback">Sem conexão: o estúdio local continua disponível, mas autenticação e sincronização na nuvem podem falhar.</p>}
       {alert && <p className="feedback" role="status">{alert}</p>}
       {tab === 'studio' && <div className="studio-grid">
-        <Viewer3D config={design} productId={design.productId} addonId={design.addonId} sizeScale={size.scale} importUrl={importUrl} />
+        <Suspense fallback={<section className="viewer" role="status" aria-label="Carregando prévia 3D"><p className="scene-loading">Carregando visualizador 3D...</p></section>}>
+          <Viewer3D config={design} productId={design.productId} addonId={design.addonId} sizeScale={size.scale} importUrl={importUrl} />
+        </Suspense>
         <aside className="customizer" aria-label="Personalização do produto">
           <div className="panel-head"><span className="viewer-kicker">02 / PERSONALIZAR</span><span className="panel-counter">CATÁLOGO DEMO</span></div>
           <h2>{currentProduct.name}</h2>
