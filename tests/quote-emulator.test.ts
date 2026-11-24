@@ -24,6 +24,7 @@ function ref(db: Firestore, uid: string, id: string) {
   return doc(db, 'users', uid, 'quotes', id);
 }
 const dependencies: QuoteDependencies = {
+  onError: error => console.error('QUOTE_TEST_ONLY_CAUSE', error),
   verifyToken: async token => {
     if (token === 'a'.repeat(120)) return 'alice';
     if (token === 'b'.repeat(120)) return 'bob';

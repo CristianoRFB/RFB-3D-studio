@@ -21,6 +21,7 @@ export type QuoteDependencies = {
     Promise<{ kind: 'created' | 'replay' | 'conflict'; quote?: SavedQuote }>;
   list: (env: QuoteEnv, uid: string) => Promise<SavedQuote[]>;
   remove: (env: QuoteEnv, uid: string, id: string) => Promise<boolean>;
+  onError?: (error: unknown) => void; // Only for instrumented isolated tests, never for response payloads.
 };
 const json = (status: number, value: unknown) => new Response(JSON.stringify(value), {
   status, headers: { 'Content-Type': 'application/json; charset=utf-8',
@@ -195,7 +196,8 @@ export async function handlePrivateQuotes(
       quote: result.quote, replay: result.kind === 'replay', kind: 'DEMONSTRATION_ONLY',
       disclaimer: 'Solicitação guardada em ambiente de demonstração; não é enviada a fornecedores nem paga.',
     });
-  } catch {
+  } catch (error) {
+    deps.onError?.(error);
     // Deliberately no raw upstream data or tokens in client-facing errors.
     return json(503, { error: 'QUOTE_SERVICE_TEMPORARILY_UNAVAILABLE' });
   }
