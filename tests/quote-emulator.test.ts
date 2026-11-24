@@ -81,6 +81,7 @@ afterAll(async () => { await env?.cleanup(); });
 describe('quote HTTP API + real Firestore Emulator persistence', () => {
   it('creates, replays and rejects changed payload with same UUID without double writing', async () => {
     const first = await handlePrivateQuotes(request('alice'), secretEnv, dependencies);
+    console.info('TEST_QUOTE_FIRST_STATUS', first.status, await first.clone().json());
     expect(first.status).toBe(201);
     const firstBody = await first.json() as { quote: SavedQuote };
     expect(firstBody.quote.ownerUid).toBe('alice');
@@ -97,7 +98,9 @@ describe('quote HTTP API + real Firestore Emulator persistence', () => {
     await assertFails(deleteDoc(ref(own, 'alice', key)));
   });
   it('separates account documents even for the same UUID, owner reads and deletes only own quotes', async () => {
-    expect((await handlePrivateQuotes(request('bob'), secretEnv, dependencies)).status).toBe(201);
+    const bobFirst = await handlePrivateQuotes(request('bob'), secretEnv, dependencies);
+    console.info('TEST_QUOTE_BOB_STATUS', bobFirst.status, await bobFirst.clone().json());
+    expect(bobFirst.status).toBe(201);
     const alice = await handlePrivateQuotes(request('alice', 'GET'), secretEnv, dependencies);
     const bob = await handlePrivateQuotes(request('bob', 'GET'), secretEnv, dependencies);
     expect((await alice.json() as { quotes: SavedQuote[] }).quotes.map(q => q.ownerUid)).toEqual(['alice']);
