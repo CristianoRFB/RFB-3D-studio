@@ -111,9 +111,10 @@ function ThreeScene({ config, productId, addonId, sizeScale, importUrl, rot, pan
       : <DemoModel config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} rot={rot} pan={pan} zoom={zoom} />}
   </Canvas>;
 }
-class ViewerBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+class ViewerBoundary extends Component<{ fallback: ReactNode; children: ReactNode; onFailure: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError(): { failed: boolean } { return { failed: true }; }
+  componentDidCatch() { this.props.onFailure(); }
   render() { return this.state.failed ? this.props.fallback : this.props.children; }
 }
 export function Preview2D({ productId, colorId, addonId }: { productId: ProductId; colorId: DisplayConfig['colorId']; addonId?: AddonId }) {
@@ -154,10 +155,12 @@ export default function Viewer3D({ config, productId, addonId, sizeScale, import
   const [lite, setLite] = useState(false);
   const [twoD, setTwoD] = useState(false);
   const [webgl, setWebgl] = useState<boolean | null>(null);
+  const [renderFailed, setRenderFailed] = useState(false);
   const drag = useRef<Drag | null>(null);
   const sceneElement = useRef<HTMLDivElement | null>(null);
   const [exportMessage, setExportMessage] = useState('');
   useEffect(() => { setWebgl(supportsWebGL()); }, []);
+  useEffect(() => { setRenderFailed(false); }, [importUrl, productId]);
   useEffect(() => {
     if (webgl !== true || twoD) return;
     const canvas = sceneElement.current?.querySelector('canvas');
@@ -166,7 +169,8 @@ export default function Viewer3D({ config, productId, addonId, sizeScale, import
     canvas.addEventListener('webglcontextlost', onLoss);
     return () => canvas.removeEventListener('webglcontextlost', onLoss);
   }, [webgl, twoD]);
-  const fallback = twoD || webgl === false;
+  const fallback = twoD || webgl === false || renderFailed;
+  const retry3D = () => { setTwoD(false); setRenderFailed(false); setWebgl(supportsWebGL()); };
   const savePNG = () => {
     setExportMessage('');
     const canvas = sceneElement.current?.querySelector('canvas');
@@ -217,7 +221,7 @@ export default function Viewer3D({ config, productId, addonId, sizeScale, import
   };
   return <section className="viewer" aria-label={'Personalização visual de ' + getProduct(productId).name}>
     <div className="viewer-head"><span className="viewer-kicker">01 / VISUALIZADOR</span>
-      <span className="viewer-tag">{fallback ? 'MODO 2D' : webgl === null ? 'PREPARANDO...' : 'WEBGL INTERATIVO'}</span></div>
+      <span className="viewer-tag">{renderFailed ? 'FALHA NO MODELO — 2D' : fallback ? 'MODO 2D' : webgl === null ? 'PREPARANDO...' : 'WEBGL INTERATIVO'}</span></div>
     <div ref={sceneElement} className={'scene ' + (fallback ? 'scene-2d' : '')} role="group" tabIndex={0}
       aria-label="Visualizador. Setas giram o produto; Shift e setas movem; mais e menos aproximam; zero restaura."
       onPointerDown={onPointerDown} onPointerMove={onPointerMove}
@@ -225,7 +229,7 @@ export default function Viewer3D({ config, productId, addonId, sizeScale, import
       onKeyDown={onKeyDown} onWheel={onWheel}>
       {fallback ? <Fallback2D config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} /> :
         webgl === null ? <p className="scene-loading">Preparando visualizador...</p> :
-        <ViewerBoundary fallback={<Fallback2D config={config} productId={productId} sizeScale={sizeScale} />}>
+        <ViewerBoundary key={importUrl ?? 'original-'+productId} onFailure={() => setRenderFailed(true)} fallback={<Fallback2D config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} />}>
           <ThreeScene config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} importUrl={importUrl} rot={rot} pan={pan} zoom={zoom} lite={lite} />
         </ViewerBoundary>}
       <div className="scene-caption">{importUrl ? 'ARQUIVO GLB LOCAL · PRÉVIA SEM COTAÇÃO' : getProduct(productId).name.toUpperCase() + ' · GEOMETRIA ORIGINAL'}</div>
@@ -237,12 +241,13 @@ export default function Viewer3D({ config, productId, addonId, sizeScale, import
       <button type="button" className="secondary" onClick={() => setZoom(z => clamp(z - .12, .65, 1.6))} disabled={fallback} aria-label="Afastar">−</button>
       <button type="button" className="secondary" onClick={resetCamera} disabled={fallback}>Restaurar vista</button>
       <button type="button" className="secondary" onClick={savePNG} disabled={fallback}>Exportar render 3D PNG</button>
+      {(renderFailed || webgl === false) && <button type="button" onClick={retry3D}>Tentar 3D novamente</button>
     </div>
     <div className="viewer-modes">
       <label><input type="checkbox" checked={lite} onChange={e => setLite(e.target.checked)} /> Qualidade reduzida</label>
       <label><input type="checkbox" checked={twoD} onChange={e => setTwoD(e.target.checked)} /> Prévia 2D</label>
     </div>
     {exportMessage && <p role="status" className="hint">{exportMessage}</p>}
-    <p className="hint">{fallback ? 'Prévia 2D disponível quando WebGL falha ou por escolha do usuário.' : 'Arraste para girar. Shift + arrastar para mover. Role para zoom. Teclado: setas, Shift+setas, +, -, 0.'}</p>
+    <p className="hint">{fallback ? 'Prévia 2D disponível quando WebGL falha, um modelo não carrega ou por escolha do usuário. Você pode tentar novamente.' : 'Arraste para girar. Shift + arrastar para mover. Role para zoom. Teclado: setas, Shift+setas, +, -, 0.'}</p>
   </section>;
 }

@@ -54,3 +54,17 @@ test('acessibilidade: reduced motion, navegação de teclado e 320px', async ({ 
   await expect(page.getByText('MODO 2D')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBeTruthy();
 });
+
+test('WebGL: perda de contexto muda para fallback verdadeiro e permite retomar render', async ({ page }) => {
+  await page.goto('/');
+  const canvas = page.locator('.scene canvas');
+  await expect(canvas).toBeVisible();
+  await canvas.evaluate(element => {
+    element.dispatchEvent(new Event('webglcontextlost', { cancelable: true }));
+  });
+  await expect(page.getByText('MODO 2D')).toBeVisible();
+  await expect(page.locator('.fallback .product-svg')).toBeVisible();
+  await page.getByRole('button', { name: 'Tentar 3D novamente' }).click();
+  await expect(page.getByText('WEBGL INTERATIVO')).toBeVisible();
+  await expect(page.locator('.scene canvas')).toBeVisible();
+});
