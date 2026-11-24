@@ -32,7 +32,7 @@
 ## Testes adicionais — 23/11/2026
 - `verifyFirebaseIdToken`: assinatura com RS256 testada com chave de laboratório, `aud`, `iss`, provider, validade e assinatura adversária. Ver `tests/private-quotes.test.ts`.
 - `DELETE /api/private/quotes/{id}` tem validação estrita de UUID, autenticação antes de buscar documento e montagem de caminho Firestore derivada do UID verificado.
-- `tests/quote-emulator.test.ts` cobre persistência/replay/conflito/exclusão com banco Firestore Emulator e usuários distintos. O helper `withSecurityRulesDisabled` NÃO propaga valores de callback; o adaptador captura explicitamente os resultados, evitando falso sucesso. CI verde [45305460501](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305460501).
+- `tests/quote-emulator.test.ts` cobre persistência/replay/conflito/exclusão com banco Firestore Emulator e usuários distintos. O helper `withSecurityRulesDisabled` NÃO propaga valores de callback; o adaptador captura explicitamente os resultados, evitando falso sucesso. CI verde [45305670927](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305670927).
 - Exportação do usuário via UI é intencionalmente **parcial (30 registros por coleção)**; não constitui portabilidade integral nem apagamento completo da conta. UI não expõe segredos.
 - GLB local limita vértices, primitivas, número de imagens/materiais e ciclos no grafo, além de URLs. Não é sandbox invulnerável para formatos 3D maliciosos; validar modelos em hardware alvo antes de release.
 - Nenhum segredo, endpoint, Firebase ou usuário real foi conectado. A API privada retorna **503 fail-closed** até autenticação, OAuth, Rate Limiter e Firestore REST de produção serem homologados.

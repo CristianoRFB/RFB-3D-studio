@@ -29,7 +29,7 @@
 
 ## Continuidade após 23/11/2026 — novos commits
 
-- **Principal baseline verde:** [CI #45305460501](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305460501) / [`9c399a18`](https://github.com/CristianoRFB/RFB-3D-studio/commit/9c399a180a4bbc62e05b202648d9b0a051e4248c): 32 Vitest, 40 Rules, 2 integração quote/Firestore, 14 E2E estúdio, 3 WebGL e 2 Auth; 81,2 KiB initial JS gzip.
+- **Principal baseline verde:** [CI #45305670927](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305670927) / [`9fc2ee48`](https://github.com/CristianoRFB/RFB-3D-studio/commit/9fc2ee48bc9695f2269c169636f88b53bdf0d4d0): 32 Vitest, 40 Rules, 2 integração quote/Firestore, 15 E2E estúdio, 3 WebGL e 2 Auth; 81,4 KiB initial JS gzip.
 - `server/private-quotes.ts`: Firebase signed JWT testado, endpoint DELETE, backend de preço sintético, UUID idempotente e rate limit obrigatório; não deployado.
 - `src/cloud/CloudWorkspace.tsx`: resolução de conflito com cópia, exportação parcial por UID (até 30 designs e 30 quotes), confirmação de exclusões. Não existe exclusão completa de conta/dados de produção.
 - `src/quote-summary.ts`: resumo TXT e mailto sem destinatário para eventual composição manual.
@@ -37,5 +37,5 @@
 - `src/glb.ts`: limite de vértices/complexidade, segurança de URIs embutidas e ciclos de nós.
 - `src/App.tsx`: central de ajuda, rota 404, marca local SVG, fallback lazy-chunk quando a importação JS falha.
 - `e2e/accessibility.spec.ts`: fumaça semântica (não auditoria WCAG). 
-- Validar no HEAD commit posterior `9fc2ee48` e docs; não replicar commits anteriores nem registrar PASS sem execução.
+- CI #45305670927 no código `9fc2ee48` PASS; validar os docs no HEAD; não replicar commits anteriores nem registrar PASS sem execução.
 - **STOP**: credenciais reais, Firebase Spark, Cloudflare preview, pricing real, IP/licenças, custo, rollback e QA física continuam sem homologação; o PR deve permanecer Draft até todos os gates.
