@@ -146,3 +146,20 @@ test('exportação SVG 2D preserva o acessório selecionado', async ({ page }) =
   expect(svg).toContain('<ellipse cx="194" cy="112"');
   expect(svg).toContain('viewBox="0 0 280 330"');
 });
+
+test('orçamento: cria e baixa resumo TXT não vinculante sem envio de mensagens', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Adicionar ao carrinho demo' }).click();
+  await page.getByRole('navigation', { name: 'Seções do estúdio' }).getByRole('button', { name: 'Carrinho' }).click();
+  await page.getByRole('button', { name: 'Gerar orçamento demonstrativo' }).click();
+  const waiting = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Preparar resumo TXT para envio manual' }).click();
+  const file = await waiting;
+  expect(file.suggestedFilename()).toMatch(/^rfb-orcamento-demo-[a-z0-9]+\.txt$/);
+  const { readFile } = await import('node:fs/promises');
+  const text = (await readFile(await file.path())).toString();
+  expect(text).toContain('SIMULAÇÃO SEM VALIDADE COMERCIAL');
+  expect(text).toContain('Garrafa Aura');
+  expect(text).toContain('TOTAL ILUSTRATIVO');
+  expect(text).toContain('exclusivamente manual');
+});
