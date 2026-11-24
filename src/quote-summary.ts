@@ -1,4 +1,5 @@
 import { brl } from './catalog';
+import { COLORS, FINISHES } from './studio';
 import type { DemoQuote } from './records';
 
 /** Shareable file, never a commercial document and never transmitted by the application. */
@@ -16,7 +17,8 @@ export function quoteSummaryText(quote: DemoQuote): string {
   ];
   const items = quote.lines.map((line, i) => {
     const details = [
-      line.productName, 'Cor: ' + line.colorLabel, 'Acabamento: ' + line.finishLabel,
+      line.productName, 'Cor: ' + (COLORS.find(c => c.id === line.config.colorId)?.label ?? line.config.colorId),
+      'Acabamento: ' + (FINISHES.find(f => f.id === line.config.finishId)?.label ?? line.config.finishId),
       'Tamanho: ' + line.sizeLabel, 'Acessório: ' + line.addonLabel,
     ];
     return [
