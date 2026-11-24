@@ -216,7 +216,7 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
         <button type="button" className="secondary" disabled={pending} onClick={() => void exportCloudSnapshot()}>
           Exportar amostra da nuvem (JSON)
         </button>
-      </div>}
+      </div>
       <details className="blueprint models-panel">
         <summary>Gestão de modelos por papel e tenant</summary>
         <div className="blueprint-content">
