@@ -24,43 +24,49 @@ function ref(db: Firestore, uid: string, id: string) {
   return doc(db, 'users', uid, 'quotes', id);
 }
 const dependencies: QuoteDependencies = {
-  onError: error => console.error('QUOTE_TEST_ONLY_CAUSE', error),
   verifyToken: async token => {
     if (token === 'a'.repeat(120)) return 'alice';
     if (token === 'b'.repeat(120)) return 'bob';
     throw new Error('INVALID_TOKEN');
   },
+  // withSecurityRulesDisabled intentionally returns void: keep results OUTSIDE its callback.
   store: async (_config, uid, id, data) => {
-    try { return await env.withSecurityRulesDisabled(async ctx => runTransaction(ctx.firestore(), async tx => {
-      const target = ref(ctx.firestore(), uid, id);
-      const old = await tx.get(target);
-      if (old.exists()) {
-        const oldData = old.data();
-        if (oldData?.requestHash === data.requestHash)
-          return { kind: 'replay' as const, quote: JSON.parse(oldData.payload as string) as SavedQuote };
-        return { kind: 'conflict' as const };
-      }
-      tx.set(target, storedQuote(uid, id, data));
-      return { kind: 'created' as const, quote: data };
-    })); }
-    catch (error) {
-      // Only logged in the isolated emulator CI; no real credentials or user data.
-      console.error('Firestore Emulator transaction failure:', error);
-      throw error;
-    }
+    const result: { current?: { kind: 'created' | 'replay' | 'conflict'; quote?: SavedQuote } } = {};
+    await env.withSecurityRulesDisabled(async ctx => {
+      result.current = await runTransaction(ctx.firestore(), async tx => {
+        const target = ref(ctx.firestore(), uid, id);
+        const old = await tx.get(target);
+        if (old.exists()) {
+          const oldData = old.data();
+          if (oldData?.requestHash === data.requestHash)
+            return { kind: 'replay' as const, quote: JSON.parse(oldData.payload as string) as SavedQuote };
+          return { kind: 'conflict' as const };
+        }
+        tx.set(target, storedQuote(uid, id, data));
+        return { kind: 'created' as const, quote: data };
+      });
+    });
+    if (!result.current) throw new Error('EMULATOR_TRANSACTION_RESULT_MISSING');
+    return result.current;
   },
-  list: async (_config, uid) =>
-    env.withSecurityRulesDisabled(async ctx => {
+  list: async (_config, uid) => {
+    let result: SavedQuote[] = [];
+    await env.withSecurityRulesDisabled(async ctx => {
       const rows = await getDocs(query(collection(ctx.firestore(), 'users', uid, 'quotes'), limit(30)));
-      return rows.docs.map(s => JSON.parse(s.data().payload as string) as SavedQuote);
-    }),
-  remove: async (_config, uid, id) =>
-    env.withSecurityRulesDisabled(async ctx => {
+      result = rows.docs.map(s => JSON.parse(s.data().payload as string) as SavedQuote);
+    });
+    return result;
+  },
+  remove: async (_config, uid, id) => {
+    let result = false;
+    await env.withSecurityRulesDisabled(async ctx => {
       const target = ref(ctx.firestore(), uid, id);
-      if (!(await getDoc(target)).exists()) return false;
+      if (!(await getDoc(target)).exists()) return;
       await deleteDoc(target);
-      return true;
-    }),
+      result = true;
+    });
+    return result;
+  },
 };
 function request(uid: 'alice' | 'bob', method = 'POST', id = key, quantity = 1) {
   const token = uid === 'alice' ? 'a'.repeat(120) : 'b'.repeat(120);
@@ -82,7 +88,6 @@ afterAll(async () => { await env?.cleanup(); });
 describe('quote HTTP API + real Firestore Emulator persistence', () => {
   it('creates, replays and rejects changed payload with same UUID without double writing', async () => {
     const first = await handlePrivateQuotes(request('alice'), secretEnv, dependencies);
-    console.info('TEST_QUOTE_FIRST_STATUS', first.status, await first.clone().json());
     expect(first.status).toBe(201);
     const firstBody = await first.json() as { quote: SavedQuote };
     expect(firstBody.quote.ownerUid).toBe('alice');
@@ -100,7 +105,6 @@ describe('quote HTTP API + real Firestore Emulator persistence', () => {
   });
   it('separates account documents even for the same UUID, owner reads and deletes only own quotes', async () => {
     const bobFirst = await handlePrivateQuotes(request('bob'), secretEnv, dependencies);
-    console.info('TEST_QUOTE_BOB_STATUS', bobFirst.status, await bobFirst.clone().json());
     expect(bobFirst.status).toBe(201);
     const alice = await handlePrivateQuotes(request('alice', 'GET'), secretEnv, dependencies);
     const bob = await handlePrivateQuotes(request('bob', 'GET'), secretEnv, dependencies);
