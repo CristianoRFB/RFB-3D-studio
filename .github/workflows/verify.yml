@@ -39,7 +39,7 @@ jobs:
           retention-days: 7
       - name: Instalar Chromium para QA E2E
         run: npx playwright install --with-deps chromium
-      - name: Quote API: fluxo real de Firestore Emulator e dois usuários
+      - name: Quote API - Firestore Emulator e dois usuarios
         run: npm run quotes:emulator
       - name: QA E2E navegador real
         run: npm run e2e
