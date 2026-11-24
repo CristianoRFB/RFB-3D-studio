@@ -31,3 +31,13 @@ export function quoteSummaryText(quote: DemoQuote): string {
     'Se o usuário decidir compartilhar este arquivo, o envio é exclusivamente manual.',
     ''].join('\n');
 }
+
+/** User-initiated email draft without recipient or automatic dispatch. */
+export function quoteEmailLink(quote: DemoQuote): string {
+  const subject = 'RFB Studio — simulação ' + quote.id.slice(0, 8);
+  const body = quoteSummaryText(quote);
+  const url = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  // Standard email clients have URL length limits; provide TXT export separately.
+  if (url.length > 8000) throw new Error('EMAIL_DRAFT_TOO_LONG');
+  return url;
+}

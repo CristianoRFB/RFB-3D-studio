@@ -189,3 +189,16 @@ test('404: navegação para URL inexistente informa erro sem inventar recurso', 
   await page.getByRole('link', { name: 'Voltar ao início' }).click();
   await expect(page.getByRole('heading', { name: 'Garrafa Aura' })).toBeVisible();
 });
+
+test('resumo de orçamento oferece apenas rascunho mailto sem destinatário', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Adicionar ao carrinho demo' }).click();
+  await page.getByRole('navigation', { name: 'Seções do estúdio' }).getByRole('button', { name: 'Carrinho' }).click();
+  await page.getByRole('button', { name: 'Gerar orçamento demonstrativo' }).click();
+  const draft = page.getByRole('link', { name: 'Preparar rascunho de e-mail (não envia)' });
+  const href = await draft.getAttribute('href');
+  expect(href).toMatch(/^mailto:\?subject=/);
+  const parsed = new URL(href!);
+  expect(parsed.pathname).toBe('');
+  expect(parsed.searchParams.get('body')).toContain('SIMULAÇÃO SEM VALIDADE COMERCIAL');
+});

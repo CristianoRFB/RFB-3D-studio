@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from
 const CloudWorkspace = lazy(() => import('./cloud/CloudWorkspace'));
 import { PRESETS } from './presets';
 import { decodeBackup, encodeBackup } from './backup';
-import { quoteSummaryText } from './quote-summary';
+import { quoteEmailLink, quoteSummaryText } from './quote-summary';
 import { inspectGLB } from './glb';
 import product from './product.json';
 import { Preview2D } from './Preview2D';
@@ -354,6 +354,7 @@ function StudioApp() {
           <div className="record-actions">
             <button type="button" className="secondary" onClick={() => downloadText('rfb-orcamento-demo-' + quote.id.slice(0, 8) + '.json', JSON.stringify(quote, null, 2), 'application/json')}>Baixar JSON da simulação</button>
             <button type="button" className="secondary" onClick={() => downloadText('rfb-orcamento-demo-' + quote.id.slice(0, 8) + '.txt', quoteSummaryText(quote), 'text/plain;charset=utf-8')}>Preparar resumo TXT para envio manual</button>
+            <a className="secondary quote-email-draft" href={quoteEmailLink(quote)}>Preparar rascunho de e-mail (não envia)</a>
             <button type="button" className="secondary" onClick={() => setWorkspace(ws => ({ ...ws, quotes: ws.quotes.filter(q => q.id !== quote.id) }))}>Excluir simulação</button>
           </div>
         </article>)}
