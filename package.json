@@ -7,10 +7,11 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run tests",
+    "test": "vitest run tests --exclude tests/quote-emulator.test.ts",
     "e2e": "playwright test",
     "rules:test": "firebase emulators:exec --only firestore --project demo-rfb-studio-tests \"node tests/firestore.rules.mjs\"",
-    "perf:budget": "node scripts/check-bundle.mjs"
+    "perf:budget": "node scripts/check-bundle.mjs",
+    "quotes:emulator": "firebase emulators:exec --only firestore --project demo-rfb-studio-tests \"npx vitest run tests/quote-emulator.test.ts\""
   },
   "dependencies": {
     "@react-three/fiber": "^9.8.0",

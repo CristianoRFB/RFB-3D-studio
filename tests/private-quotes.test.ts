@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { INITIAL_DESIGN } from '../src/catalog';
-import { handlePrivateQuotes, type SavedQuote, type QuoteDependencies, type QuoteEnv } from '../server/private-quotes';
+import { generateKeyPair, SignJWT } from 'jose';
+import { handlePrivateQuotes, verifyFirebaseIdToken,
+  type SavedQuote, type QuoteDependencies, type QuoteEnv } from '../server/private-quotes';
 
 const token = 'x'.repeat(128);
 const baseURL = 'https://test.invalid/api/private/quotes';
@@ -32,6 +34,7 @@ function stubDeps() {
       storage.set(k, quote); return { kind: 'created', quote };
     },
     list: async (_e, uid) => [...storage.values()].filter(q => q.ownerUid === uid),
+    remove: async (_e, uid, key) => storage.delete(uid + ':' + key),
   };
   return { deps, storage };
 }
@@ -71,5 +74,40 @@ describe('authenticated demonstration quote contract (mocked external IO)', () =
     expect((await handlePrivateQuotes(post('a'.repeat(20000)), env, deps)).status).toBe(413);
     expect((await handlePrivateQuotes(post({ items: [INITIAL_DESIGN] }, id, token, 'text/plain'), env, deps)).status).toBe(415);
     expect((await handlePrivateQuotes(new Request(baseURL, { method: 'DELETE' }), env, deps)).status).toBe(405);
+  });
+});
+
+describe('quote deletion + signed JWT verification', () => {
+  it('deletes only the verified owner quote, is repeatable, and rejects invalid paths', async () => {
+    const { deps, storage } = stubDeps();
+    expect((await handlePrivateQuotes(post({ items: [INITIAL_DESIGN] }), env, deps)).status).toBe(201);
+    const del = (bearer = token, key = id) => new Request(baseURL + '/' + key, {
+      method: 'DELETE', headers: { authorization: 'Bearer ' + bearer },
+    });
+    expect((await handlePrivateQuotes(del('not-allowed'.repeat(12)), env, deps)).status).toBe(401);
+    expect((await handlePrivateQuotes(del(token, 'not-valid'), env, deps)).status).toBe(404);
+    const remove = await handlePrivateQuotes(del(), env, deps);
+    expect(remove.status).toBe(200);
+    expect((await remove.json() as { deleted: boolean }).deleted).toBe(true);
+    expect(storage.size).toBe(0);
+    const repeated = await handlePrivateQuotes(del(), env, deps);
+    expect((await repeated.json() as { deleted: boolean }).deleted).toBe(false);
+  });
+  it('checks a real RS256 signature, audience, issuer, lifetime, and disallows anonymous', async () => {
+    const { privateKey, publicKey } = await generateKeyPair('RS256');
+    const project = 'demo-rfb-studio-tests';
+    const issue = async (sub: string, issuer: string, audience: string, provider = 'password') =>
+      new SignJWT({ sub, firebase: { sign_in_provider: provider } })
+        .setProtectedHeader({ alg: 'RS256' }).setIssuer(issuer)
+        .setAudience(audience).setIssuedAt().setExpirationTime('45m').sign(privateKey);
+    const issuer = 'https://securetoken.google.com/' + project;
+    const valid = await issue('alice', issuer, project);
+    expect(await verifyFirebaseIdToken(valid, project, publicKey)).toBe('alice');
+    await expect(verifyFirebaseIdToken(valid, 'other-project', publicKey)).rejects.toThrow();
+    await expect(verifyFirebaseIdToken(await issue('alice', 'https://invalid.invalid/', project), project, publicKey)).rejects.toThrow();
+    await expect(verifyFirebaseIdToken(await issue('alice', issuer, 'other-project'), project, publicKey)).rejects.toThrow();
+    await expect(verifyFirebaseIdToken(await issue('alice', issuer, project, 'anonymous'), project, publicKey)).rejects.toThrow('INVALID_IDENTITY');
+    const unrelated = await generateKeyPair('RS256');
+    await expect(verifyFirebaseIdToken(valid, project, unrelated.publicKey)).rejects.toThrow();
   });
 });

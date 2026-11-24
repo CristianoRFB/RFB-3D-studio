@@ -6,7 +6,7 @@ import {
 } from 'firebase/auth';
 import { type DesignConfig, brl, quoteLine } from '../catalog';
 import { type CartItem } from '../records';
-import { isPrivateQuoteEnabled, listPrivateQuotes, requestPrivateQuote, type PrivateQuote } from './quotes';
+import { deletePrivateQuote, isPrivateQuoteEnabled, listPrivateQuotes, requestPrivateQuote, type PrivateQuote } from './quotes';
 import { createId } from '../records';
 import { cloudServices } from './firebase';
 import { deleteRemoteDesign, DesignConflict, listRemoteDesigns, upsertRemoteDesign, type RemoteDesign } from './designs';
@@ -99,6 +99,17 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
     catch { setStatus('Não foi possível consultar solicitações.'); }
     finally { setPending(false); }
   }
+  async function deleteQuote(item: PrivateQuote) {
+    if (!services || !user || pending) return;
+    if (!window.confirm('Excluir esta solicitação demonstrativa da sua conta? Esta ação não pode ser desfeita.')) return;
+    setPending(true); setStatus('');
+    try {
+      await deletePrivateQuote(user, item.id);
+      setRemoteQuotes(await listPrivateQuotes(user));
+      setStatus('Solicitação removida da sua conta.');
+    } catch { setStatus('Não foi possível excluir a solicitação. Nenhuma exclusão foi confirmada.'); }
+    finally { setPending(false); }
+  }
   async function save() {
     if (!services || !user || pending) return;
     setPending(true); setStatus('');
@@ -170,6 +181,8 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
           {remoteQuotes.map(q => <article className="quote-card" key={q.id}>
             <strong>Solicitação {q.id.slice(0, 8)} · {brl(q.totalCents)}</strong>
             <p className="helper">Status: {q.status} · {q.createdAt.slice(0, 10)}</p>
+            <button type="button" className="secondary" disabled={pending}
+              onClick={() => void deleteQuote(q)} aria-label={'Excluir solicitação ' + q.id.slice(0, 8)}>Excluir solicitação</button>
           </article>)}
         </> : <p className="helper">O endpoint de solicitações autenticadas está desativado até configurar um Worker isolado com credenciais e rate limiting.</p>}
       </div>

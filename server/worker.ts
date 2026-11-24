@@ -22,7 +22,7 @@ export async function handleRequest(request: Request, env: QuoteEnv = {}): Promi
   if (pathname === '/api/health' && request.method === 'GET') {
     return response(200, { service: 'rfb-studio-demo', status: 'ok', catalogVersion: CATALOG_VERSION });
   }
-  if (pathname === '/api/private/quotes') return handlePrivateQuotes(request, env);
+  if (pathname === '/api/private/quotes' || pathname.startsWith('/api/private/quotes/')) return handlePrivateQuotes(request, env);
   if (pathname !== '/api/demo-quote') return response(404, { error: 'NOT_FOUND' });
   if (request.method !== 'POST') return response(405, { error: 'METHOD_NOT_ALLOWED' });
   if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) return response(415, { error: 'UNSUPPORTED_MEDIA_TYPE' });

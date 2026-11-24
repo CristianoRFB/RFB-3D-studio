@@ -20,6 +20,7 @@ export type QuoteDependencies = {
   store: (env: QuoteEnv, uid: string, id: string, quote: SavedQuote) =>
     Promise<{ kind: 'created' | 'replay' | 'conflict'; quote?: SavedQuote }>;
   list: (env: QuoteEnv, uid: string) => Promise<SavedQuote[]>;
+  remove: (env: QuoteEnv, uid: string, id: string) => Promise<boolean>;
 };
 const json = (status: number, value: unknown) => new Response(JSON.stringify(value), {
   status, headers: { 'Content-Type': 'application/json; charset=utf-8',
@@ -31,8 +32,11 @@ const VALID_PROJECT = /^[a-z][a-z0-9-]{4,62}$/;
 const VALID_UID = /^[a-zA-Z0-9_-]{2,128}$/;
 const GOOGLE_TOKEN = 'https://oauth2.googleapis.com/token';
 
-async function verifyFirebase(token: string, project: string): Promise<string> {
-  const { payload } = await jwtVerify(token, keys, {
+/** Firebase ID token check, with injectable trusted key source for cryptographic tests. */
+export async function verifyFirebaseIdToken(
+  token: string, project: string, trustedKeys: Parameters<typeof jwtVerify>[1] = keys,
+): Promise<string> {
+  const { payload } = await jwtVerify(token, trustedKeys, {
     audience: project, issuer: 'https://securetoken.google.com/' + project,
     algorithms: ['RS256'], maxTokenAge: '1 hour',
   });
@@ -106,7 +110,16 @@ async function listQuotes(env: QuoteEnv, uid: string): Promise<SavedQuote[]> {
     .filter((x): x is SavedQuote => x !== null && x.ownerUid === uid)
     .sort((a,b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 30);
 }
-const liveDeps: QuoteDependencies = { verifyToken: verifyFirebase, store: persistQuote, list: listQuotes };
+async function removeQuote(env: QuoteEnv, uid: string, id: string): Promise<boolean> {
+  const token = await serviceToken(env);
+  const result = await fetch(docURL(env.FIREBASE_PROJECT_ID!, uid, id), {
+    method: 'DELETE', headers: { Authorization: 'Bearer ' + token },
+  });
+  if (result.status === 404) return false; // Idempotent delete: already removed.
+  if (!result.ok) throw new Error('FIRESTORE_DELETE_FAILED');
+  return true;
+}
+const liveDeps: QuoteDependencies = { verifyToken: verifyFirebaseIdToken, store: persistQuote, list: listQuotes, remove: removeQuote };
 async function readJsonLimited(request: Request): Promise<unknown> {
   const reader = request.body?.getReader();
   const chunks: Uint8Array[] = []; let size = 0;
@@ -129,7 +142,12 @@ async function sha256(raw: string): Promise<string> {
 export async function handlePrivateQuotes(
   request: Request, env: QuoteEnv = {}, deps: QuoteDependencies = liveDeps,
 ): Promise<Response> {
-  if (request.method !== 'GET' && request.method !== 'POST') return json(405, { error: 'METHOD_NOT_ALLOWED' });
+  const path = new URL(request.url).pathname;
+  const base = '/api/private/quotes';
+  const suffix = path.startsWith(base + '/') ? path.slice(base.length + 1) : null;
+  if (suffix !== null && (!VALID_ID.test(suffix) || request.method !== 'DELETE')) return json(404, { error: 'NOT_FOUND' });
+  if (suffix === null && request.method !== 'GET' && request.method !== 'POST')
+    return json(405, { error: 'METHOD_NOT_ALLOWED' });
   if (env.ENABLE_DEMO_QUOTE_PERSISTENCE !== 'true' || !env.FIREBASE_PROJECT_ID
       || !VALID_PROJECT.test(env.FIREBASE_PROJECT_ID)
       || !env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
@@ -146,6 +164,11 @@ export async function handlePrivateQuotes(
   const quota = await env.QUOTE_RATE_LIMITER.limit({ key: uid });
   if (!quota.success) return json(429, { error: 'RATE_LIMITED' });
   try {
+    if (suffix !== null) {
+      const removed = await deps.remove(env, uid, suffix);
+      return json(200, { deleted: removed, kind: 'DEMONSTRATION_ONLY',
+        disclaimer: 'Somente o registro desta conta pode ser excluído.' });
+    }
     if (request.method === 'GET') return json(200, { quotes: await deps.list(env, uid), kind: 'DEMONSTRATION_ONLY' });
     if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
       return json(415, { error: 'UNSUPPORTED_MEDIA_TYPE' });

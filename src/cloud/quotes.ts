@@ -34,3 +34,19 @@ export async function listPrivateQuotes(user: User): Promise<PrivateQuote[]> {
     v !== null && typeof v === 'object' && v.status === 'REQUESTED_DEMO' &&
     typeof v.id === 'string' && typeof v.createdAt === 'string' && Number.isInteger(v.totalCents)).slice(0,30);
 }
+
+/** Delete only a quote owned by the Firebase UID in the verified ID token. */
+export async function deletePrivateQuote(user: User, id: string): Promise<boolean> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error('INVALID_QUOTE_ID');
+  }
+  if (!isPrivateQuoteEnabled()) throw new Error('QUOTE_DISABLED');
+  const response = await fetch('/api/private/quotes/' + id, {
+    method: 'DELETE',
+    headers: { Authorization: 'Bearer ' + await user.getIdToken() },
+    cache: 'no-store',
+  });
+  if (!response.ok) throw new Error('QUOTE_DELETE_UNAVAILABLE_' + response.status);
+  const data = await response.json() as { deleted?: unknown };
+  return data.deleted === true;
+}
