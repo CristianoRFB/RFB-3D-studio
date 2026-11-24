@@ -1,5 +1,16 @@
 # RFB Studio — configurador 3D | RFB Method
 
+<!-- RFB-PORTFOLIO-README-V1 -->
+<div align="center">
+  <img src="public/brand/logo.svg" alt="Logo conceitual do RFBStudio" width="440"/>
+  
+  **Escolha, visualize e transforme**
+  
+  <sub>Configurador 3D em branch draft, testado localmente; sem deploy</sub>
+</div>
+
+> **Portfólio RFB Labs.** Este projeto valoriza arquitetura, fluxos e evidência técnica real. O logo ainda é um conceito e os recursos a seguir têm o estágio detalhado na documentação. Não confundir sandbox/emulador com produção.
+
 **Estado verificado em 23/11/2026:** aplicação demonstrativa G4 implementada e testada no Chromium, WebGL via SwiftShader e Firebase Emulator. **Não há deploy Cloudflare/Firebase real e não se trata de sistema comercial homologado.** Desenvolvimento em [PR #1 Draft](https://github.com/CristianoRFB/RFB-3D-studio/pull/1), sem merge na `main`.
 
 > **Escolha, visualize e transforme.** Configurador visual de produtos 3D usando React 19, TypeScript, Vite, Three.js, React Three Fiber e integrações Firebase opcionais.
@@ -43,3 +54,24 @@ A execução de CI inclui também o modo WebGL e o teste Auth+Firestore em emula
 - [Pesquisa comparativa G0](docs/RESEARCH-CONFIGURATORS.md) · [58 telas e UX](docs/UX-DESIGN-AND-QA.md) · [Assets e licenças](docs/ASSETS-LICENSES.md) · [Infra/custo](docs/INFRA-COSTS.md).
 
 **Bloqueios atuais:** Firebase real/claims/credenciais, Worker + persistência testados no runtime Cloudflare, autorização e QA de preview isolado, acessibilidade/dispositivos físicos e validação comercial. [Issue #2](https://github.com/CristianoRFB/RFB-3D-studio/issues/2), [#3](https://github.com/CristianoRFB/RFB-3D-studio/issues/3) e [#4](https://github.com/CristianoRFB/RFB-3D-studio/issues/4) permanecem abertas. **Meta de R$0/mês adicional**, sujeita a quotas verificadas; nenhum billing foi ativado.
+
+## Galeria visual do produto
+
+Capturas reais serão adicionadas após QA desktop/mobile em staging local com dados sintéticos. Os quatro quadros abaixo estão **pendentes**, não são imagens do aplicativo publicado.
+
+| Experiência a documentar | Captura |
+|---|---|
+| 1. Catálogo 3D | Pendente de captura verificável |
+| 2. Personalização e render | Pendente de captura verificável |
+| 3. Resumo de preço e variantes | Pendente de captura verificável |
+| 4. Configuração salva/carrinho | Pendente de captura verificável |
+
+[Manifesto de capturas e evidências](docs/screenshots/manifest.json). Nenhuma imagem artificial deve ser apresentada como screenshot funcional.
+
+---
+
+<div align="center">
+  <img src="public/brand/assinatura-rfb.svg" width="70" alt="Assinatura institucional RFB"/>
+  
+  <sub>Desenvolvido por RFB · assinatura do criador, independente da marca do aplicativo.</sub>
+</div>
