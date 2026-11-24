@@ -29,8 +29,8 @@ const dependencies: QuoteDependencies = {
     if (token === 'b'.repeat(120)) return 'bob';
     throw new Error('INVALID_TOKEN');
   },
-  store: async (_config, uid, id, data) =>
-    env.withSecurityRulesDisabled(async ctx => runTransaction(ctx.firestore(), async tx => {
+  store: async (_config, uid, id, data) => {
+    try { return await env.withSecurityRulesDisabled(async ctx => runTransaction(ctx.firestore(), async tx => {
       const target = ref(ctx.firestore(), uid, id);
       const old = await tx.get(target);
       if (old.exists()) {
@@ -41,7 +41,13 @@ const dependencies: QuoteDependencies = {
       }
       tx.set(target, storedQuote(uid, id, data));
       return { kind: 'created' as const, quote: data };
-    })),
+    })); }
+    catch (error) {
+      // Only logged in the isolated emulator CI; no real credentials or user data.
+      console.error('Firestore Emulator transaction failure:', error);
+      throw error;
+    }
+  },
   list: async (_config, uid) =>
     env.withSecurityRulesDisabled(async ctx => {
       const rows = await getDocs(query(collection(ctx.firestore(), 'users', uid, 'quotes'), limit(30)));
