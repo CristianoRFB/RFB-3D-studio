@@ -179,7 +179,7 @@ export default function App() {
   return <div className="shell" style={theme}>
     <a href="#conteudo" className="skip">Pular para o conteúdo</a>
     <header className="topbar">
-      <a className="brand" href="#conteudo" onClick={() => setTab('studio')} aria-label="RFB Studio início">RFB<span>Studio</span><span className="brand-dot">.</span></a>
+      <a className="brand" href="#conteudo" onClick={() => setTab('studio')} aria-label="RFB Studio início"><img className="brand-icon" src="/brand/icone.svg" alt="" width="34" height="34" />RFB<span>Studio</span><span className="brand-dot">.</span></a>
       <span className="status">RFB METHOD / LABORATÓRIO G2–G3</span>
     </header>
     <nav className="main-nav" aria-label="Seções do estúdio">

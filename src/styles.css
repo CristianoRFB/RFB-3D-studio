@@ -113,3 +113,6 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{o
 .cloud-export h3{margin:0 0 8px}
 .conflict-actions{border-color:#9984bd}
 .conflict-actions button{margin:4px 8px 4px 0}
+
+.brand{display:inline-flex;align-items:center;gap:5px}
+.brand-icon{display:inline-block;flex:none;border-radius:8px;margin-right:7px}

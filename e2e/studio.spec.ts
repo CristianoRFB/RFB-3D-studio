@@ -163,3 +163,13 @@ test('orçamento: cria e baixa resumo TXT não vinculante sem envio de mensagens
   expect(text).toContain('TOTAL ILUSTRATIVO');
   expect(text).toContain('exclusivamente manual');
 });
+
+test('marca própria: favicon e ícone SVG internos sem marca de terceiros', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('header .brand-icon')).toBeVisible();
+  const favicon = page.locator('head link[rel="icon"]');
+  await expect(favicon).toHaveAttribute('href', '/brand/icone.svg');
+  const response = await page.request.get('/brand/icone.svg');
+  expect(response.ok()).toBeTruthy();
+  expect(await response.text()).toContain('Ícone RFBStudio');
+});
