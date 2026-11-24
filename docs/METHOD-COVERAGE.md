@@ -34,3 +34,16 @@ O catálogo completo de 58 telas está em [UX-DESIGN-AND-QA.md](UX-DESIGN-AND-QA
 
 ### Gates de 90% e full
 Antes de declarar pelo menos 90% ou 100%, exigir aceites funcionais E2E e RBAC em ambiente isolado real, catálogos e preços aprovados, QA físico/perf/a11y, confidencialidade LGPD, verificação de custo, deployment/rollback, revisão independente e aprovação final. O estado atual não satisfaz essa condição.
+
+## Atualização de aceites — 23/11/2026
+
+**Base de evidência:** GitHub [#45305460501](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305460501) sobre [`9c399a18`](https://github.com/CristianoRFB/RFB-3D-studio/commit/9c399a180a4bbc62e05b202648d9b0a051e4248c).
+
+- **AC-06:** CRUD Firebase Auth/Firestore emulado, resolução de conflitos em duas sessões via cópia, exportação parcial e exclusão autenticada com confirmação.
+- **AC-09:** API privada com JWT assinado (teste criptográfico), idempotência, isolamento em duas contas e gravação/exclusão no Firestore Emulator; no navegador, resumo TXT e `mailto:` só com revisão/ação do usuário. **Não** é integração OAuth/REST Cloudflare implantada.
+- **AC-11:** fallback 2D após perda sintética de contexto WebGL e ação de recuperação; fallback ao não carregar bundle 3D implementado em novo commit com QA a concluir.
+- **AC-12:** GLB autoral local com limites de GPU/complexidade, rejeição de hierarquia cíclica; biblioteca do tenant mantém RBAC em Rules Emulator.
+- **T015/T028:** Ajuda funcional e 404 com testes E2E; ícone e favicon SVG do próprio projeto integrados.
+- **G5:** testes semânticos de labels, ids, botões e navegação em Chromium, mas **não** equivalente a conformidade WCAG 2.2, Lighthouse ou avaliação de acessibilidade com pessoas.
+
+**Classificação estrita pelo RFB Method:** cobertura `IMPLEMENTED_CODE` não implica `ACCEPTED`; a meta de 90% requer aceites integrais com API real, serviço conectado, tenant/roles efetivos, preços comerciais legítimos, performance e auditoria, governança de dados e rollback. Continuar com as Issues #2–#4 sem reclassificá-las artificialmente.

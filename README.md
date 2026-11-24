@@ -75,3 +75,11 @@ Capturas reais serão adicionadas após QA desktop/mobile em staging local com d
   
   <sub>Desenvolvido por RFB · assinatura do criador, independente da marca do aplicativo.</sub>
 </div>
+
+## Atualização funcional 23/11/2026
+
+A demonstração também oferece: marca SVG local na barra e favicon; carregamento lazy do motor 3D (bundle inicial ~81 KiB gzip); alternativa 2D e recuperação após falhas do WebGL; teste de falha ao carregar o módulo JS ainda a verificar no último SHA; central de ajuda, 404, exportação parcial dos próprios designs/quotes do Firebase Emulator, proteção de edição concorrente, exclusão de solicitações autenticadas, resumo de orçamento TXT e preparação opcional de `mailto:` sem destinatário nem envio.
+
+[CI recente aprovado #45305460501](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305460501): 32 testes Vitest, 40 verificações Firestore Rules, 2 cenários quote+Firestore Emulator, 14 E2E Chromium, 3 WebGL/SwiftShader e 2 Auth+Firestore Emulator. **Não representa homologação comercial**.
+
+**Bloqueio de entrega pública e de 90% integral:** não há projeto Firebase Spark dedicado conectado, Cloudflare Workers preview com OAuth/RateLimiter/testes, catálogo e preços comerciais reais, revisão de segurança/legal e validação em GPU/dispositivos físicos. Estas etapas exigem ambiente autorizado e conferência das franquias gratuitas. O PR #1 permanece Draft.

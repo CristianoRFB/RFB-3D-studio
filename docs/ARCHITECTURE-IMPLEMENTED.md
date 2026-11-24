@@ -107,3 +107,9 @@ Modelos GLB externos passam por validação 8 MB, estrutura glTF2 e restrições
 - `docs/PROGRESS.md` e `PROJECT_STATUS.json`: evidência real e não realizado.
 - `docs/BACKEND-SECURITY.md`: threat model.
 - `docs/DEPLOY-PLAN.md`: gates de rollout sem ativar serviços pagos.
+
+## Atualização do fluxo (23/11/2026)
+- O render 3D carrega sob demanda pelo React lazy, e a prévia SVG usa módulo independente; falha de chunk passa por Error Boundary e fallback sem falsificar renderização.
+- O fluxo privado tem `GET`, `POST` e `DELETE` por UUID; a identidade é derivada do ID token verificado, nunca do corpo. Testes reais de armazenamento **somente no Firestore Emulator**.
+- Recuperação de conflito é por criação de cópia, sem forçar overwrite. Export de nuvem é limitado intencionalmente, não backup integral.
+- No caminho local, TXT e `mailto:` são alternativas de colaboração manual sem side effects automáticos, contrato ou envio.

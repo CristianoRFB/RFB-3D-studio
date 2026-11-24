@@ -25,3 +25,13 @@
 - A escrita via service account bypassa as Firestore Rules, por isso a assinatura do token e o UID derivado apenas do token são OBRIGATÓRIOS.
 - Cotas Free, compartilhamento do namespace do limiter, escalabilidade, revogação de tokens, monitoramento, backup e política de retenção precisam gate adicional.
 - Valores enviados são simulações ilustrativas. Nenhum orçamento é enviado a fornecedores nem aprovado automaticamente.
+
+## Extensão testada em 23/11/2026 — registro e exclusão por UID
+
+- `DELETE /api/private/quotes/{uuid-v4}` requer o mesmo token verificado e binding de quota. O UID deriva do token; não há `uid` escolhido por parâmetro ou body. Somente o documento `/users/{verifiedUid}/quotes/{id}` pode ser excluído. Resposta `{deleted:true}` ou `{deleted:false}` se já não existir (idempotente). Nunca exclui dados de outros usuários.
+- `src/cloud/CloudWorkspace.tsx` pede confirmação explícita antes de excluir uma solicitação ou design remoto e oferece exportação parcial dos próprios registros.
+- Testes JWT de assinatura RS256, projeto, emissor, provedor anônimo, chave errada e expiração continuam usando chaves locais de testes.
+- [CI #45305460501](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305460501) validou `tests/quote-emulator.test.ts` (dois usuários e **Firestore Emulator verdadeiro**, persistência de documentos, replay, conflito e exclusão), além de unitários e 40 testes Rules.
+- **Limite:** integração Firestore Emulator usa adaptador de testes com permissões privilegiadas; NÃO é prova de funcionamento do `persistQuote` via OAuth/REST Cloudflare real nem da emissão/revogação de tokens em produção.
+- `src/quote-summary.ts` gera arquivo TXT local e `mailto:` opcional sem destinatário, dependentes de ação expressa do usuário; jamais envia, cobra ou transforma cotação demo em proposta comercial.
+- Não incluir CPF, nome, email, endereço, preços reais ou chaves de service account nos testes/snapshots.
