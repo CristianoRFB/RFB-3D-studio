@@ -29,12 +29,13 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
   const pendingQuoteId = useRef<string | null>(null);
   useEffect(() => { pendingQuoteId.current = null; }, [cart]);
   const [status, setStatus] = useState('');
+  const [conflict, setConflict] = useState(false);
 
   useEffect(() => {
     if (!services) return;
     return onAuthStateChanged(services.auth, next => {
       setUser(next); setSessionLoading(false);
-      setItems([]); setSelected(null); setStatus('');
+      setItems([]); setSelected(null); setStatus(''); setConflict(false); setRemoteQuotes([]);
     }, () => { setSessionLoading(false); setStatus('Não foi possível confirmar a sessão.'); });
   }, [services]);
 
@@ -112,7 +113,7 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
   }
   async function save() {
     if (!services || !user || pending) return;
-    setPending(true); setStatus('');
+    setPending(true); setStatus(''); setConflict(false);
     try {
       await upsertRemoteDesign({
         db: services.db, uid: user.uid, id: selected?.id ?? createId(),
@@ -122,12 +123,52 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
       await refresh(user.uid);
       setStatus('Design gravado no Firestore da sua conta.');
     } catch (error) {
-      setStatus(error instanceof DesignConflict ? error.message : 'Falha ao salvar. Confirme a conexão e suas permissões.');
+      if (error instanceof DesignConflict) setConflict(true);
+      setStatus(error instanceof DesignConflict
+        ? error.message + ' Você pode recarregar a versão mais recente ou salvar uma cópia independente.'
+        : 'Falha ao salvar. Confirme a conexão e suas permissões.');
     } finally { setPending(false); }
   }
 
+  async function saveCopy() {
+    if (!services || !user || pending) return;
+    setPending(true); setStatus('');
+    try {
+      await upsertRemoteDesign({
+        db: services.db, uid: user.uid, id: createId(), title: title + ' (cópia)',
+        config: design,
+      });
+      setSelected(null); setConflict(false);
+      await refresh(user.uid);
+      setStatus('Cópia independente criada. O design original permanece intacto.');
+    } catch { setStatus('Não foi possível criar a cópia. Confirme conexão e permissões.'); }
+    finally { setPending(false); }
+  }
+  async function exportCloudSnapshot() {
+    if (!services || !user || pending) return;
+    setPending(true); setStatus('');
+    try {
+      const designs = await listRemoteDesigns(services.db, user.uid);
+      const includeQuotes = isPrivateQuoteEnabled();
+      const quotes = includeQuotes ? await listPrivateQuotes(user) : [];
+      const snapshot = {
+        schemaVersion: 1, kind: 'RFB_STUDIO_USER_SNAPSHOT',
+        exportedAt: new Date().toISOString(),
+        scope: 'first_30_records_per_collection', // Never claim full account portability.
+        designs, quotes, quotesAvailability: includeQuotes ? 'up_to_30' : 'endpoint_disabled',
+      };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' }));
+      const link = document.createElement('a');
+      link.href = url; link.download = 'rfb-studio-nuvem-amostra.json';
+      document.body.append(link); link.click(); link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus('Exportação parcial gerada (até 30 designs e 30 solicitações). Não é um relatório integral da conta.');
+    } catch { setStatus('Não foi possível exportar os registros agora. Tente novamente com conexão.'); }
+    finally { setPending(false); }
+  }
   async function remove(entry: RemoteDesign) {
     if (!services || !user || pending) return;
+    if (!window.confirm('Excluir este design da nuvem? A operação não pode ser desfeita.')) return;
     setPending(true); setStatus('');
     try {
       await deleteRemoteDesign(services.db, user.uid, entry.id);
@@ -151,12 +192,17 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
       <button type="button" disabled={pending} onClick={() => void save()}>
         {selected ? 'Salvar edição na nuvem' : 'Salvar configuração atual na nuvem'}
       </button>
+      {conflict && <div className="conflict-actions" role="group" aria-label="Resolver conflito de edição">
+        <p className="helper">O documento remoto mudou. Sua edição atual ainda está neste dispositivo; abra o original novamente ou salve uma cópia.</p>
+        <button type="button" disabled={pending} onClick={() => void saveCopy()}>Salvar como cópia nova</button>
+        <button type="button" className="secondary" disabled={pending} onClick={() => {setConflict(false);setSelected(null);setStatus('Selecione a versão mais recente abaixo ou crie um design novo.');void refresh(user.uid);}}>Recarregar lista</button>
+      </div>}
       <div className="record-grid">
         {items.map(item => <article key={item.id} className="record-card record-body">
           <h3>{item.title}</h3><p>Revisão {item.revision} · Atualizado {item.updatedAt.slice(0, 10)}</p>
           <div className="record-actions">
             <button type="button" disabled={pending} onClick={() => {
-              onLoad(item.config); setTitle(item.title); setSelected(item);
+              onLoad(item.config); setTitle(item.title); setSelected(item); setConflict(false);
               setStatus('Design carregado no estúdio. Retorne a esta seção para salvar a edição.');
             }}>Abrir no estúdio</button>
             <button type="button" className="secondary" disabled={pending} onClick={() => void remove(item)}>Excluir da nuvem</button>
@@ -164,6 +210,13 @@ export default function CloudWorkspace({ design, onLoad, cart }: {
         </article>)}
       </div>
       {items.length === 0 && <div className="empty-state">Nenhum design disponível nesta conta.</div>}
+      <div className="cloud-export">
+        <h3>Seus dados remotos</h3>
+        <p className="helper">Exportação JSON de até 30 designs e 30 solicitações da sua conta. Pode ser parcial; não inclui credenciais, tokens, dados de outros usuários ou documentos de outros tenants.</p>
+        <button type="button" className="secondary" disabled={pending} onClick={() => void exportCloudSnapshot()}>
+          Exportar amostra da nuvem (JSON)
+        </button>
+      </div>}
       <details className="blueprint models-panel">
         <summary>Gestão de modelos por papel e tenant</summary>
         <div className="blueprint-content">
