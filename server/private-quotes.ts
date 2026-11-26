@@ -161,9 +161,9 @@ export async function handlePrivateQuotes(
   try { uid = await deps.verifyToken(match[1], env.FIREBASE_PROJECT_ID); }
   catch { return json(401, { error: 'INVALID_ID_TOKEN' }); }
   if (!VALID_UID.test(uid)) return json(401, { error: 'INVALID_ID_TOKEN' });
-  const quota = await env.QUOTE_RATE_LIMITER.limit({ key: uid });
-  if (!quota.success) return json(429, { error: 'RATE_LIMITED' });
   try {
+    const quota = await env.QUOTE_RATE_LIMITER.limit({ key: uid });
+    if (!quota.success) return json(429, { error: 'RATE_LIMITED' });
     if (suffix !== null) {
       const removed = await deps.remove(env, uid, suffix);
       return json(200, { deleted: removed, kind: 'DEMONSTRATION_ONLY',
