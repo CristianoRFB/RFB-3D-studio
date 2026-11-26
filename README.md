@@ -83,3 +83,12 @@ A demonstração também oferece: marca SVG local na barra e favicon; carregamen
 [CI recente aprovado #45305670927](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305670927): 32 testes Vitest, 40 verificações Firestore Rules, 2 cenários quote+Firestore Emulator, 15 E2E Chromium, 3 WebGL/SwiftShader e 2 Auth+Firestore Emulator. **Não representa homologação comercial**.
 
 **Bloqueio de entrega pública e de 90% integral:** não há projeto Firebase Spark dedicado conectado, Cloudflare Workers preview com OAuth/RateLimiter/testes, catálogo e preços comerciais reais, revisão de segurança/legal e validação em GPU/dispositivos físicos. Estas etapas exigem ambiente autorizado e conferência das franquias gratuitas. O PR #1 permanece Draft.
+
+## EVOLVE 02 — biblioteca e motor GLB (26/11/2026)
+
+Baseline EVOLVE 01: [CI #45760264431](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45760264431), SHA `de05bec7f3daca9c1630a0afc53d60ad45bff2ba`, PASS.
+
+- Biblioteca GLB IndexedDB local, gravação voluntária, reabertura após recarga, download do arquivo original, exclusão individual confirmada e limpeza na seção Privacidade. Limites: 6 modelos, 24 MiB totais, 8 MiB por modelo. Backup JSON não contém GLBs; download individual disponível. Sem upload/sincronização comercial.
+- Validação de intervalos binários, accessors e instâncias; prévia restrita a geometria estática sem texturas, animações ou extensões até homologação de limites de decodificação. Fallback 2D de arquivo externo informa indisponibilidade, sem simular geometria ou preço de catálogo.
+- Testes Vitest de limites/validação e Playwright de persistência, exportação byte a byte, cancelamento de exclusão, limpeza e captura real programada. **CI no HEAD novo e inspeção visual da captura pendentes**; GPU física, WCAG, nuvem, assets licenciados e demais gates de produção continuam abertos.
+- Protocolos aplicados: AntiVibeCoding (testes e evidências), Anti-Preguiça (fluxo persistente e privacidade), Criatividade (biblioteca reutilizável sem infraestrutura paga), Anti-AI Slop (sem falso render ou imagem inventada), QA visual (captura automatizada prevista; revisão manual não realizada), STOP (nenhum deploy/custo/aceite inventado).
