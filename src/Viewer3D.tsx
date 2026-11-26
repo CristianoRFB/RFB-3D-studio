@@ -118,7 +118,8 @@ class ViewerBoundary extends Component<{ fallback: ReactNode; children: ReactNod
   componentDidCatch() { this.props.onFailure(); }
   render() { return this.state.failed ? this.props.fallback : this.props.children; }
 }
-function Fallback2D({ config, productId, addonId }: Props) {
+function Fallback2D({ config, productId, addonId, importUrl }: Props) {
+  if (importUrl) return <div className="fallback" role="status"><strong>Prévia do GLB indisponível em 2D.</strong><span>Ative o 3D novamente ou remova o arquivo para visualizar o produto do catálogo.</span></div>;
   return <div className="fallback"><Preview2D productId={productId} colorId={config.colorId} addonId={addonId} /><span>Prévia 2D funcional · ilustração original</span></div>;
 }
 
@@ -201,9 +202,9 @@ export default function Viewer3D({ config, productId, addonId, sizeScale, import
       onPointerDown={onPointerDown} onPointerMove={onPointerMove}
       onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}
       onKeyDown={onKeyDown} onWheel={onWheel}>
-      {fallback ? <Fallback2D config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} /> :
+      {fallback ? <Fallback2D config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} importUrl={importUrl} /> :
         webgl === null ? <p className="scene-loading">Preparando visualizador...</p> :
-        <ViewerBoundary key={importUrl ?? 'original-'+productId} onFailure={() => setRenderFailed(true)} fallback={<Fallback2D config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} />}>
+        <ViewerBoundary key={importUrl ?? 'original-'+productId} onFailure={() => setRenderFailed(true)} fallback={<Fallback2D config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} importUrl={importUrl} />}>
           <ThreeScene config={config} productId={productId} addonId={addonId} sizeScale={sizeScale} importUrl={importUrl} rot={rot} pan={pan} zoom={zoom} lite={lite} />
         </ViewerBoundary>}
       <div className="scene-caption">{importUrl ? 'ARQUIVO GLB LOCAL · PRÉVIA SEM COTAÇÃO' : getProduct(productId).name.toUpperCase() + ' · GEOMETRIA ORIGINAL'}</div>
