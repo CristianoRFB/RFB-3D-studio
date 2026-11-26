@@ -59,3 +59,12 @@
 **Commit `9fc2ee48` e posteriores:** fallback para carregamento falho do bundle 3D foi aprovado por Playwright no CI #45305670927. Consultar [Actions](https://github.com/CristianoRFB/RFB-3D-studio/actions) para o HEAD exato.
 
 **RFB STOP:** apesar da cobertura de código de todos os doze AC, a regra de 90%/100% de aceites integrais NÃO está satisfeita. Falta projeto Firebase Spark real, custo/quota, custom claims, Cloudflare Worker preview/API testada, catálogo e preços comerciais aprovados, LGPD de conta, leitores de tela e GPU/mobile físicos, licença de assets históricos e revisão de release. Todas as Issues #2, #3, #4 permanecem abertas.
+
+## EVOLVE 02 — biblioteca e motor GLB (26/11/2026)
+
+Baseline EVOLVE 01: [CI #45760264431](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45760264431), SHA `de05bec7f3daca9c1630a0afc53d60ad45bff2ba`, PASS.
+
+- Biblioteca GLB IndexedDB local, gravação voluntária, reabertura após recarga, download do arquivo original, exclusão individual confirmada e limpeza na seção Privacidade. Limites: 6 modelos, 24 MiB totais, 8 MiB por modelo. Backup JSON não contém GLBs; download individual disponível. Sem upload/sincronização comercial.
+- Validação de intervalos binários, accessors e instâncias; prévia restrita a geometria estática sem texturas, animações ou extensões até homologação de limites de decodificação. Fallback 2D de arquivo externo informa indisponibilidade, sem simular geometria ou preço de catálogo.
+- Testes Vitest de limites/validação e Playwright de persistência, exportação byte a byte, cancelamento de exclusão, limpeza e captura real programada. **CI no HEAD novo e inspeção visual da captura pendentes**; GPU física, WCAG, nuvem, assets licenciados e demais gates de produção continuam abertos.
+- Protocolos aplicados: AntiVibeCoding (testes e evidências), Anti-Preguiça (fluxo persistente e privacidade), Criatividade (biblioteca reutilizável sem infraestrutura paga), Anti-AI Slop (sem falso render ou imagem inventada), QA visual (captura automatizada prevista; revisão manual não realizada), STOP (nenhum deploy/custo/aceite inventado).
