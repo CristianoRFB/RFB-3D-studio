@@ -19,11 +19,11 @@
   "typecheck": "PASS_CI_45305670927",
   "build": "PASS_CI_45305670927",
   "browser_qa": "PLAYWRIGHT_15_STUDIO_3_WEBGL_2_AUTH_PASS_CI_45305670927",
-  "ci": "PASS_CI_45305670927_CODE_9fc2ee48_DOCS_HEAD_RECHECK",
+  "ci": "PREVIOUS_HEAD_PASS_45306056459_EVOLVE01_NEW_HEAD_NOT_VERIFIED",
   "source_png_assets": "NOT_IMPORTED",
   "monthly_recurring_cost_added_brl": 0,
   "requirements_trace": "docs/PROGRESS.md",
-  "next_action": "Complete current GitHub CI on HEAD, obtain isolated Firebase project and authorised Cloudflare Workers preview; test real OAuth JWT revocation, rate limiting and REST; do hardware/a11y/security and cost verification. Keep PR Draft until approval.",
+  "next_action": "Verify EVOLVE 01 CI at exact HEAD, obtain dedicated Firebase Spark project and Cloudflare Billing Read confirmation; create isolated preview with quotes disabled; execute real smoke, then OAuth/REST/rate tests with synthetic accounts.",
   "ci_run_url": "https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305670927",
   "catalog_3_models": "THREE_PROCEDURAL_MODELS_RENDER_PASS",
   "preset_gallery": "SIX_PRESETS_UNIT_E2E_PASS",
@@ -69,5 +69,19 @@
     "DEVICE_GPU_PERFORMANCE_WCAG",
     "LICENSE_AND_REAL_PRICING",
     "REVIEW_AND_ROLLBACK"
-  ]
+  ],
+  "infrastructure_evolve_01": {
+    "date": "2026-11-26",
+    "previous_head": "ec9bf6ae490946c2a13a4d68e40d30f0fb6f90be",
+    "previous_head_ci": "https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45306056459",
+    "cloudflare_subdomain": "on7",
+    "preview_candidate": "rfb-studio-preview",
+    "name_collision": "NONE_IN_LIST_READ",
+    "billing_check": "BLOCKED_HTTP_403_BILLING_READ",
+    "firebase": "NO_PROJECT_OR_ADMIN_ACTION_AVAILABLE_IN_CURRENT_CHAT",
+    "preflight": "CODE_ADDED_CI_PENDING",
+    "quote_limiter_failure": "FAIL_CLOSED_CODE_ADDED_TEST_PENDING",
+    "live_smoke": "NOT_RUN",
+    "deploy": "NOT_DEPLOYED"
+  }
 }
