@@ -46,6 +46,15 @@ describe('authenticated demonstration quote contract (mocked external IO)', () =
     expect((await handlePrivateQuotes(post({ items: [INITIAL_DESIGN] }, id, 'bad'.repeat(50)), env, deps)).status).toBe(401);
     expect((await handlePrivateQuotes(post({ items: [INITIAL_DESIGN] }), { ...env, QUOTE_RATE_LIMITER: { limit: async()=>({success:false}) } }, deps)).status).toBe(429);
   });
+  it('fails closed if the rate limiter is unavailable, without writing any quote', async () => {
+    const { deps, storage } = stubDeps();
+    const response = await handlePrivateQuotes(post({ items: [INITIAL_DESIGN] }), {
+      ...env, QUOTE_RATE_LIMITER: { limit: async () => { throw new Error('private infrastructure failure'); } },
+    }, deps);
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: 'QUOTE_SERVICE_TEMPORARILY_UNAVAILABLE' });
+    expect(storage.size).toBe(0);
+  });
   it('uses verified UID, recalculates prices and preserves idempotency', async () => {
     const { deps, storage } = stubDeps();
     const first = await handlePrivateQuotes(post({ items: [INITIAL_DESIGN] }), env, deps);
