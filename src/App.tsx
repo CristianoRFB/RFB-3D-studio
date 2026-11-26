@@ -1,9 +1,10 @@
-import { Component, lazy, Suspense, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 const CloudWorkspace = lazy(() => import('./cloud/CloudWorkspace'));
 import { PRESETS } from './presets';
 import { decodeBackup, encodeBackup } from './backup';
 import { quoteEmailLink, quoteSummaryText } from './quote-summary';
-import { inspectGLB } from './glb';
+import { inspectGLB, MAX_GLB_BYTES } from './glb';
+import { listLocalModels, saveLocalModel, removeLocalModel, clearLocalModels, type LocalModel } from './local-models';
 import product from './product.json';
 import { Preview2D } from './Preview2D';
 const Viewer3D = lazy(() => import('./Viewer3D'));
@@ -76,6 +77,13 @@ function StudioApp() {
   const [search, setSearch] = useState('');
   const [importUrl, setImportUrl] = useState<string | null>(null);
   const [importName, setImportName] = useState('');
+  const [activeModel, setActiveModel] = useState<LocalModel | null>(null);
+  const [library, setLibrary] = useState<LocalModel[]>([]);
+  const [libraryBusy, setLibraryBusy] = useState(false);
+  const [libraryError, setLibraryError] = useState('');
+  const [confirmModel, setConfirmModel] = useState<string | null>(null);
+  const libraryLock = useRef(false);
+  const importGeneration = useRef(0);
   const [alert, setAlert] = useState('');
   const [storageStatus, setStorageStatus] = useState<'verificando' | 'salvo' | 'indisponivel'>('verificando');
   const [confirmLocalDelete, setConfirmLocalDelete] = useState(false);
@@ -111,6 +119,49 @@ function StudioApp() {
     catch { /* O blueprint é acessório. */ }
   }, [step]);
 
+  useEffect(() => {
+    let alive = true;
+    void listLocalModels().then(models => { if (alive && !libraryLock.current) setLibrary(models); })
+      .catch(() => { if (alive && !libraryLock.current) setLibraryError('Biblioteca local indisponível. A prévia em memória continua disponível.'); });
+    return () => { alive = false; };
+  }, []);
+  function clearPreview() {
+    importGeneration.current++;
+    setImportUrl(null); setImportName(''); setActiveModel(null);
+  }
+  function openModel(model: LocalModel) {
+    const metadata = inspectGLB(model.bytes);
+    importGeneration.current++;
+    setActiveModel(model);
+    setImportName(model.name);
+    setImportUrl(URL.createObjectURL(new Blob([model.bytes], { type: 'model/gltf-binary' })));
+    setAlert('GLB carregado localmente: ' + metadata.meshCount + ' malha(s). Vendas desabilitadas nesta prévia.');
+  }
+  async function importModel(file: File) {
+    const generation = ++importGeneration.current;
+    try {
+      if (file.size > MAX_GLB_BYTES) throw new Error('GLB deve ter até 8 MB');
+      const bytes = await file.arrayBuffer();
+      const result = inspectGLB(bytes);
+      if (generation !== importGeneration.current) return;
+      openModel({id:createId(),name:file.name.slice(0,70),bytes,meshCount:result.meshCount,savedAt:Date.now()});
+    } catch(error) {
+      if (generation === importGeneration.current) setAlert(error instanceof Error ? error.message : 'Não foi possível importar o modelo.');
+    }
+  }
+  async function libraryOperation(action: () => Promise<void>) {
+    if (libraryLock.current) return;
+    libraryLock.current = true; setLibraryBusy(true); setLibraryError('');
+    try { await action(); setLibrary(await listLocalModels()); }
+    catch(error) { setLibraryError(error instanceof Error ? error.message : 'Falha na biblioteca local.'); }
+    finally { libraryLock.current = false; setLibraryBusy(false); }
+  }
+  function downloadModel(model: LocalModel) {
+    const url = URL.createObjectURL(new Blob([model.bytes], {type:'model/gltf-binary'}));
+    const link = document.createElement('a');
+    link.href = url; link.download = model.name; document.body.append(link); link.click(); link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url),1000);
+  }
   const change = (update: Partial<DesignConfig>) => {
     setDesign(current => normalizeDesign({ ...current, ...update }));
     setSelectedDesign(null);
@@ -118,7 +169,7 @@ function StudioApp() {
   };
   const choose = (id: DesignConfig['productId']) => {
     setDesign(current => chooseProduct(current, id));
-    setSelectedDesign(null); setImportUrl(null); setImportName(''); setAlert('Produto carregado. Ajuste o design no estúdio.'); setTab('studio');
+    setSelectedDesign(null); clearPreview(); setAlert('Produto carregado. Ajuste o design no estúdio.'); setTab('studio');
   };
   const saveCurrent = () => {
     if (importUrl) { setAlert('Remova o arquivo GLB local antes de salvar um produto de catálogo.'); return; }
@@ -145,7 +196,7 @@ function StudioApp() {
     } catch { setAlert('Não foi possível criar o orçamento.'); }
   };
   const loadSaved = (id: string) => {
-    setImportUrl(null); setImportName('');
+    clearPreview();
     const saved = workspace.designs.find(x => x.id === id);
     if (!saved) return;
     setDesign(normalizeDesign(saved.config)); setDesignName(saved.label); setSelectedDesign(id);
@@ -167,14 +218,18 @@ function StudioApp() {
       if (file.size > 200000) throw new Error('Arquivo muito grande');
       const backup = decodeBackup(await file.text());
       setDesign(backup.design); setWorkspace(backup.workspace); setSelectedDesign(null);
-      setImportUrl(null); setImportName(''); setConfirmLocalDelete(false);
+      clearPreview(); setConfirmLocalDelete(false);
       setAlert('Backup local restaurado neste navegador.');
     } catch { setAlert('Backup inválido ou incompatível. Nenhum registro foi alterado.'); }
   };
-  const deleteLocal = () => {
-    if (!confirmLocalDelete) return;
+  const deleteLocal = async () => {
+    if (!confirmLocalDelete || libraryLock.current) return;
+    libraryLock.current = true; setLibraryBusy(true);
+    try { await clearLocalModels(); setLibrary([]); setLibraryError(''); setConfirmModel(null); }
+    catch { setAlert('Não foi possível excluir os modelos GLB locais. Nenhum outro registro foi redefinido.'); return; }
+    finally { libraryLock.current = false; setLibraryBusy(false); }
     setWorkspace(EMPTY_WORKSPACE()); setDesign({ ...INITIAL_DESIGN }); setSelectedDesign(null);
-    setImportUrl(null); setImportName(''); setStep(0); setConfirmLocalDelete(false);
+    clearPreview(); setStep(0); setConfirmLocalDelete(false);
     try {
       window.localStorage.removeItem('rfbstudio:demo:v1');
       window.localStorage.removeItem('rfbstudio:workspace:v1');
@@ -226,25 +281,45 @@ function StudioApp() {
           <p className="helper">{currentProduct.description}</p>
           <div className="group glb-import">
             <h3>Prévia de modelo GLB próprio</h3>
-            <p className="helper">Importe um arquivo GLB autoral de até 8 MB; apenas prévia em memória. Não é salvo, enviado ao servidor ou incluído no preço.</p>
-            <label className="form-label" htmlFor="model-upload">Arquivo GLB local</label>
-            <input id="model-upload" type="file" accept=".glb,model/gltf-binary" onChange={async e => {
-              const file = e.currentTarget.files?.[0];
-              if (!file) return;
-              try {
-                const bytes = await file.arrayBuffer();
-                const result = inspectGLB(bytes);
-                const url = URL.createObjectURL(new Blob([bytes], { type: 'model/gltf-binary' }));
-                setImportUrl(url); setImportName(file.name.slice(0, 70));
-                setAlert('GLB carregado localmente: ' + result.meshCount + ' malha(s). Vendas desabilitadas nesta prévia.');
-              } catch (error) { setAlert(error instanceof Error ? error.message : 'Não foi possível importar o modelo.'); }
-              e.target.value = '';
-            }} />
-            {importUrl && <div className="import-status"><strong>Modelo externo: {importName}</strong>
-              <button type="button" className="secondary" onClick={() => { setImportUrl(null); setImportName(''); setAlert('Prévia GLB removida.'); }}>Remover GLB local</button>
-            </div>}
-          </div>
-          <div className="group">
+            <p className="helper">Importe um GLB próprio ou licenciado de até 8 MB. A prévia não é enviada à nuvem nem incluída no preço. Salve na biblioteca somente se desejar manter o arquivo neste navegador.</p>
+             <label className="form-label" htmlFor="model-upload">Arquivo GLB local</label>
+             <input id="model-upload" type="file" accept=".glb,model/gltf-binary" onChange={e => {
+               const file = e.currentTarget.files?.[0];
+               e.currentTarget.value = '';
+               if (file) void importModel(file);
+             }} />
+             {activeModel && <div className="import-status"><strong>Modelo externo: {importName}</strong>
+               <span>{activeModel.meshCount} malha(s) · {(activeModel.bytes.byteLength / 1024).toFixed(1)} KiB</span>
+               <button type="button" disabled={libraryBusy || library.some(m => m.id === activeModel.id)} onClick={() => void libraryOperation(async () => {
+                 await saveLocalModel(activeModel); setAlert('Modelo salvo na biblioteca deste navegador.');
+               })}>Salvar na biblioteca local</button>
+               <button type="button" className="secondary" onClick={() => { clearPreview(); setAlert('Prévia GLB removida.'); }}>Remover GLB local</button>
+             </div>}
+             <div className="local-library">
+               <h3>Biblioteca GLB local</h3>
+               <p className="helper">{library.length}/6 arquivos · {(library.reduce((n,m)=>n+m.bytes.byteLength,0)/1048576).toFixed(2)}/24 MB · sem sincronização entre dispositivos.</p>
+               {libraryBusy && <p role="status">Atualizando biblioteca...</p>}
+               {libraryError && <p role="alert" className="feedback">{libraryError}</p>}
+               {!library.length && !libraryBusy && <p className="helper">Nenhum modelo salvo. Importe e salve um GLB para reutilizá-lo.</p>}
+               {library.map(model => <article className="record-card record-body" key={model.id}>
+                 <h4>{model.name}</h4>
+                 <p>{model.meshCount} malha(s) · {(model.bytes.byteLength/1024).toFixed(1)} KiB</p>
+                 <div className="record-actions">
+                   <button type="button" className="secondary" disabled={libraryBusy} onClick={() => openModel(model)}>Abrir GLB salvo</button>
+                   <button type="button" className="secondary" disabled={libraryBusy} onClick={() => downloadModel(model)}>Baixar GLB</button>
+                   <button type="button" className="secondary" disabled={libraryBusy} onClick={() => setConfirmModel(model.id)}>Excluir GLB</button>
+                 </div>
+                 {confirmModel === model.id && <div className="record-actions">
+                   <button type="button" disabled={libraryBusy} onClick={() => void libraryOperation(async () => {
+                     await removeLocalModel(model.id); if (activeModel?.id === model.id) clearPreview();
+                     setConfirmModel(null); setAlert('GLB excluído da biblioteca local.');
+                   })}>Confirmar exclusão GLB</button>
+                   <button type="button" className="secondary" onClick={() => setConfirmModel(null)}>Cancelar</button>
+                 </div>}
+               </article>)}
+             </div>
+           </div>
+           <div className="group">
             <h3>Produto</h3>
             <div className="select-list" role="group" aria-label="Produtos disponíveis">
               {PRODUCTS.map(p => <button key={p.id} type="button" className={'finish ' + (design.productId === p.id ? 'chosen' : '')}
@@ -401,13 +476,13 @@ function StudioApp() {
           <details><summary>Posso comprar ou enviar pedidos?</summary>
             <p>Não. Carrinho e orçamentos são simulações sem valor jurídico/comercial. O resumo TXT pode ser baixado para uso manual, mas o aplicativo não envia mensagens nem cobra pagamentos.</p></details>
           <details><summary>Posso importar meu modelo 3D?</summary>
-            <p>É possível visualizar um GLB local glTF 2.0 de até 8 MB com estrutura válida. Ele não é salvo na conta, enviado ao servidor ou vendido. Utilize somente arquivos próprios/licenciados.</p></details>
+            <p>É possível visualizar um GLB local glTF 2.0 de até 8 MB com estrutura válida. Você pode salvá-lo voluntariamente na biblioteca deste navegador. Ele não é salvo na conta, enviado ao servidor ou vendido. Utilize somente arquivos próprios/licenciados.</p></details>
         </div>
         <button type="button" className="secondary" onClick={() => setTab('studio')}>Voltar ao estúdio</button>
       </section>}
       {tab === 'privacidade' && <section className="content-card" aria-label="Privacidade e dados locais">
         <div className="section-head"><div><p className="viewer-kicker">CONTROLE DO USUÁRIO</p><h2>Privacidade e dados</h2></div><span className="viewer-tag">SOMENTE NESTE NAVEGADOR</span></div>
-        <p className="helper">Designs locais, carrinho e simulações ficam armazenados no navegador sem conta. Você pode fazer um backup JSON, restaurá-lo ou apagar esses registros. A operação não envia dados para serviços externos.</p>
+        <p className="helper">Designs locais, carrinho e simulações ficam armazenados no navegador sem conta. Você pode fazer um backup JSON, restaurá-lo ou apagar esses registros. O backup JSON não contém arquivos GLB; baixe cada modelo separadamente na biblioteca. A operação não envia dados para serviços externos.</p>
         <div className="metrics">
           <div><span>Designs locais</span><strong>{workspace.designs.length}</strong></div>
           <div><span>Itens locais</span><strong>{workspace.cart.length}</strong></div>
@@ -425,16 +500,16 @@ function StudioApp() {
         </div>
         <div className="privacy-delete">
           <h3>Excluir os registros locais</h3>
-          <p className="helper">Essa ação redefine designs, carrinho, simulações e configuração atual. É irreversível neste navegador sem um backup exportado.</p>
+          <p className="helper">Essa ação apaga também a biblioteca GLB deste navegador e redefine designs, carrinho, simulações e configuração atual. É irreversível neste navegador sem um backup exportado.</p>
           <label><input type="checkbox" checked={confirmLocalDelete} onChange={e => setConfirmLocalDelete(e.target.checked)}/> Confirmo que desejo apagar meus registros locais.</label>
-          <button type="button" className="secondary" disabled={!confirmLocalDelete} onClick={deleteLocal}>Excluir todos os dados locais</button>
+          <button type="button" className="secondary" disabled={!confirmLocalDelete || libraryBusy} onClick={() => void deleteLocal()}>Excluir todos os dados locais</button>
         </div>
         <p className="disclaimer">Dados sincronizados com uma conta Firebase NÃO são apagados por esta operação. Na seção Minha conta, cada design remoto pode ser excluído separadamente. Exclusão completa de uma conta Firebase depende de um fluxo de servidor homologado.</p>
       </section>}
       {cloudVisited && <div hidden={tab !== 'nuvem'}>
         <Suspense fallback={<section className="content-card" role="status">Preparando autenticação...</section>}>
           <CloudWorkspace design={design} cart={workspace.cart} onLoad={config => {
-            setDesign(normalizeDesign(config)); setImportUrl(null); setImportName('');
+            setDesign(normalizeDesign(config)); clearPreview();
             setSelectedDesign(null); setTab('studio');
             setAlert('Design da nuvem carregado. Edite e retorne à seção Minha conta para salvar as alterações.');
           }}/>
