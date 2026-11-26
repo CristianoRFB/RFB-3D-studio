@@ -1,4 +1,4 @@
-/** Client-only GLB safety gate. Imported models are never uploaded or persisted. */
+/** Client-only GLB safety gate. Models can be explicitly saved locally, never uploaded. */
 export const MAX_GLB_BYTES = 8 * 1024 * 1024;
 export function inspectGLB(buffer: ArrayBuffer): { meshCount: number } {
   if (buffer.byteLength < 28 || buffer.byteLength > MAX_GLB_BYTES) throw new Error('GLB deve ter até 8 MB');
@@ -94,6 +94,51 @@ export function inspectGLB(buffer: ArrayBuffer): { meshCount: number } {
   const binLength = view.getUint32(jsonEnd, true);
   if (view.getUint32(jsonEnd + 4, true) !== 0x004e4942 || binLength < 12 || jsonEnd + 8 + binLength !== buffer.byteLength) {
     throw new Error('Chunk binário GLB inválido');
+  }
+  // Static, embedded geometry subset: bound binary ranges before the loader allocates buffers.
+  if (root.buffers.length !== 1 || root.buffers[0]?.uri !== undefined ||
+      !Number.isInteger(root.buffers[0]?.byteLength) || root.buffers[0].byteLength < 12 ||
+      root.buffers[0].byteLength > binLength || binLength - root.buffers[0].byteLength > 3)
+    throw new Error('Buffer GLB embutido inválido');
+  const integer = (n: unknown): n is number => typeof n === 'number' && Number.isSafeInteger(n) && n >= 0;
+  for (const bv of root.bufferViews) {
+    const offset = bv?.byteOffset ?? 0;
+    if (bv?.buffer !== 0 || !integer(offset) || !integer(bv.byteLength) || bv.byteLength < 1 ||
+        offset + bv.byteLength > root.buffers[0].byteLength ||
+        (bv.byteStride !== undefined && (!integer(bv.byteStride) || bv.byteStride < 4 || bv.byteStride > 252 || bv.byteStride % 4 !== 0)))
+      throw new Error('Intervalo de buffer GLB inválido');
+  }
+  const widths: Record<number,number> = {5120:1,5121:1,5122:2,5123:2,5125:4,5126:4};
+  const dimensions: Record<string,number> = {SCALAR:1,VEC2:2,VEC3:3,VEC4:4};
+  for (const acc of root.accessors) {
+    const bv = root.bufferViews[acc?.bufferView];
+    const width = widths[acc?.componentType] ?? 0;
+    const dimension = dimensions[acc?.type] ?? 0;
+    const offset = acc?.byteOffset ?? 0;
+    const element = width * dimension;
+    if (!bv || !element || !integer(acc.count) || acc.count < 1 || acc.count > 1000000 ||
+        !integer(offset) || offset % width !== 0 || acc.sparse !== undefined)
+      throw new Error('Accessor GLB inválido ou não suportado');
+    const stride = bv.byteStride ?? element;
+    if (stride < element || offset + (acc.count - 1) * stride + element > bv.byteLength)
+      throw new Error('Accessor GLB excede o buffer');
+  }
+  // Bound repeated mesh instances as well as unique geometry. Reject compressed or
+  // image-bearing assets for this geometry-only preview until decoded image budgets exist.
+  if ((Array.isArray(root.images) && root.images.length) ||
+      (Array.isArray(root.textures) && root.textures.length) ||
+      (Array.isArray(root.skins) && root.skins.length) ||
+      (Array.isArray(root.animations) && root.animations.length) ||
+      (Array.isArray(root.extensionsUsed) && root.extensionsUsed.length))
+    throw new Error('Prévia GLB aceita geometria estática sem texturas, animações ou extensões');
+  let instanceVertices = 0;
+  for (const node of Array.isArray(root.nodes) ? root.nodes : []) {
+    if (node?.mesh === undefined) continue;
+    if (!integer(node.mesh) || node.mesh >= root.meshes.length) throw new Error('Referência de malha inválida');
+    for (const primitive of root.meshes[node.mesh].primitives) {
+      instanceVertices += root.accessors[primitive.attributes.POSITION].count;
+      if (instanceVertices > 350000) throw new Error('Instâncias GLB excedem o limite de vértices');
+    }
   }
   return { meshCount: root.meshes.length };
 }
