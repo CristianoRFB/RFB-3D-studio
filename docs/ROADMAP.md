@@ -110,3 +110,12 @@
 - [ ] Aprovar CI no HEAD novo; smoke real após deploy isolado.
 - [ ] Confirmar plano Cloudflare (consulta de subscriptions HTTP 403, falta Billing Read) e projeto Firebase Spark dedicado (administração não disponível neste chat).
 - [ ] Configurar preview com quotes desligados, testar roteamento, Auth e Rules reais; depois OAuth/REST/limiter e rollback. Nenhuma alteração em conta, billing ou produção.
+
+## EVOLVE 02 — biblioteca e motor GLB (26/11/2026)
+
+Baseline EVOLVE 01: [CI #45760264431](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45760264431), SHA `de05bec7f3daca9c1630a0afc53d60ad45bff2ba`, PASS.
+
+- Biblioteca GLB IndexedDB local, gravação voluntária, reabertura após recarga, download do arquivo original, exclusão individual confirmada e limpeza na seção Privacidade. Limites: 6 modelos, 24 MiB totais, 8 MiB por modelo. Backup JSON não contém GLBs; download individual disponível. Sem upload/sincronização comercial.
+- Validação de intervalos binários, accessors e instâncias; prévia restrita a geometria estática sem texturas, animações ou extensões até homologação de limites de decodificação. Fallback 2D de arquivo externo informa indisponibilidade, sem simular geometria ou preço de catálogo.
+- Testes Vitest de limites/validação e Playwright de persistência, exportação byte a byte, cancelamento de exclusão, limpeza e captura real programada. **CI no HEAD novo e inspeção visual da captura pendentes**; GPU física, WCAG, nuvem, assets licenciados e demais gates de produção continuam abertos.
+- Protocolos aplicados: AntiVibeCoding (testes e evidências), Anti-Preguiça (fluxo persistente e privacidade), Criatividade (biblioteca reutilizável sem infraestrutura paga), Anti-AI Slop (sem falso render ou imagem inventada), QA visual (captura automatizada prevista; revisão manual não realizada), STOP (nenhum deploy/custo/aceite inventado).
