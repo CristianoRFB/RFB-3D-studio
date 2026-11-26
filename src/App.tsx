@@ -267,7 +267,7 @@ function StudioApp() {
       {tab === 'studio' && <div className="studio-grid">
         <ViewerImportBoundary fallback={<section className="viewer" aria-label="Visualizador 2D após falha do módulo 3D">
           <div className="viewer-head"><span className="viewer-kicker">PRÉVIA 2D</span><span className="viewer-tag">FALHA NO CARREGAMENTO 3D</span></div>
-          <div className="fallback"><Preview2D productId={design.productId} colorId={design.colorId} addonId={design.addonId} /></div>
+          <div className="fallback">{importUrl ? <p>Prévia do GLB indisponível em 2D.</p> : <Preview2D productId={design.productId} colorId={design.colorId} addonId={design.addonId} />}</div>
           <p className="hint">O módulo 3D não foi carregado. A prévia 2D permanece disponível; verifique a conexão e recarregue a página.</p>
           <button type="button" className="secondary" onClick={() => window.location.reload()}>Recarregar visualizador</button>
         </section>}>
@@ -281,7 +281,7 @@ function StudioApp() {
           <p className="helper">{currentProduct.description}</p>
           <div className="group glb-import">
             <h3>Prévia de modelo GLB próprio</h3>
-            <p className="helper">Importe um GLB próprio ou licenciado de até 8 MB. A prévia não é enviada à nuvem nem incluída no preço. Salve na biblioteca somente se desejar manter o arquivo neste navegador.</p>
+            <p className="helper">Importe um GLB próprio ou licenciado de até 8 MB, com geometria estática sem texturas, animações ou extensões. A prévia não é enviada à nuvem nem incluída no preço. Salve na biblioteca somente se desejar manter o arquivo neste navegador.</p>
              <label className="form-label" htmlFor="model-upload">Arquivo GLB local</label>
              <input id="model-upload" type="file" accept=".glb,model/gltf-binary" onChange={e => {
                const file = e.currentTarget.files?.[0];
@@ -357,9 +357,9 @@ function StudioApp() {
               onChange={e => change({ quantity: Number(e.target.value) })} />
           </div>
           <div className="configuration" aria-live="polite">
-            <span>VALOR ILUSTRATIVO · {CATALOG_VERSION}</span>
+            {importUrl ? <><span>MODELO IMPORTADO</span><strong className="price">Sem cotação</strong><p>O arquivo não faz parte do catálogo comercial.</p></> : <><span>VALOR ILUSTRATIVO · {CATALOG_VERSION}</span>
             <strong className="price">{brl(currentLine.totalCents)}</strong>
-            <p>{design.quantity} × {brl(currentLine.unitCents)} · {size.label} · {currentLine.addonLabel}</p>
+            <p>{design.quantity} × {brl(currentLine.unitCents)} · {size.label} · {currentLine.addonLabel}</p></>}
           </div>
           <div className="save-panel">
             <label className="form-label" htmlFor="design-name">Nome do design (sem dados pessoais)</label>
@@ -371,7 +371,7 @@ function StudioApp() {
             <button type="button" className="secondary" onClick={exportDesign} disabled={!!importUrl}>Exportar configuração JSON</button>
             <button type="button" className="secondary" onClick={export2D} disabled={!!importUrl}>Baixar prévia 2D SVG</button>
             <button type="button" className="secondary" onClick={share} disabled={!!importUrl}>Gerar link de configuração</button>
-            <button type="button" className="secondary" onClick={() => { setDesign({ ...INITIAL_DESIGN }); setSelectedDesign(null); setAlert('Configuração restaurada.'); }}>Restaurar padrão</button>
+            <button type="button" className="secondary" onClick={() => { clearPreview(); setDesign({ ...INITIAL_DESIGN }); setSelectedDesign(null); setAlert('Configuração restaurada.'); }}>Restaurar padrão</button>
           </div>
           <p className="disclaimer">Valores sem impostos, frete ou compromisso comercial. O preço é calculado no cliente e NÃO é válido como cobrança ou orçamento contratado.</p>
         </aside>
@@ -401,7 +401,7 @@ function StudioApp() {
             <div className="product-copy"><p className="viewer-kicker">{getProduct(preset.config.productId).name}</p>
               <h3>{preset.title}</h3><p>{preset.description}</p><strong>{brl(quoteLine(preset.config).totalCents)}</strong>
               <button type="button" onClick={() => {
-                setDesign(normalizeDesign(preset.config)); setSelectedDesign(null); setDesignName(preset.title);
+                clearPreview(); setDesign(normalizeDesign(preset.config)); setSelectedDesign(null); setDesignName(preset.title);
                 setTab('studio'); setAlert('Preset carregado. Ajuste as opções e salve seu próprio design.');
               }}>Usar este preset</button>
             </div>
