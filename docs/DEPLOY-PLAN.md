@@ -26,3 +26,9 @@
 - Exigir CI PASS no **HEAD exato**, reviewer, aceites de segurança/dados/LGPD/asset, scripts de rollback e backup real.
 - Promover `main` ou publicar URL pública somente após aprovação específica. Meta recorrente R$0 não assegura uso ilimitado; excedentes devem falhar sem cobrar quando possível.
 - Dados e valores sintéticos devem ser substituídos por catálogo comercial legítimo e aceito. Pagamentos/transações/fornecedores não são parte da demo atual; não declarar funcionalidade que não foi implantada.
+
+## EVOLVE 01 — preflight executável (26/11/2026)
+
+Nome candidato: `rfb-studio-preview`; URL prevista (não publicada): `https://rfb-studio-preview.on7.workers.dev`. Consulta de Workers não encontrou esse nome; subdomínio `on7` confirmado. A consulta de subscriptions retornou 403 por escopo Billing Read ausente; não assumir plano Free. Nenhum recurso criado. Firebase continua sem projeto Spark dedicado identificável por ação administrativa disponível.
+
+Antes de provisionar: `npm ci`, `npm run build`, `node scripts/infra-preflight.mjs --self-test`, `node scripts/infra-preflight.mjs --demo`. Use o preflight no mesmo ambiente do build (sem arquivos .env não auditados); para Firebase dedicado, exporte os quatro VITE públicos e `RFB_STUDIO_APPROVED_FIREBASE_PROJECT`, então rode `--firebase`. O script verifica consistência, não comprova identidade, plano ou IAM. Não adicionar segredos VITE nem ligar persistência de quotes. Após deploy autorizado do artefato correto, execute `node scripts/infra-preflight.mjs --smoke https://rfb-studio-preview.on7.workers.dev`; cinco requests sintéticos verificam HTML, health, API 404, quote demonstrativa e 503 da API privada desativada. Sem tokens ou dados reais. Smoke não substitui QA física nem autenticação real.
