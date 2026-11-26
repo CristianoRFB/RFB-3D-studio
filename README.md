@@ -1,13 +1,94 @@
-# RFBStudio — RFB Labs
+# RFB Studio — configurador 3D | RFB Method
 
-> **Projeto em planejamento.** Repositório inicial do produto RFBStudio; **ainda não é uma aplicação pronta nem um serviço publicado.**
+<!-- RFB-PORTFOLIO-README-V1 -->
+<div align="center">
+  <img src="public/brand/logo.svg" alt="Logo conceitual do RFBStudio" width="440"/>
+  
+  **Escolha, visualize e transforme**
+  
+  <sub>Configurador 3D em branch draft, testado localmente; sem deploy</sub>
+</div>
 
-Personalização e visualização de produtos 3D, variantes, configurações e orçamento.
+> **Portfólio RFB Labs.** Este projeto valoriza arquitetura, fluxos e evidência técnica real. O logo ainda é um conceito e os recursos a seguir têm o estágio detalhado na documentação. Não confundir sandbox/emulador com produção.
 
-Este repositório foi iniciado em 22/11/2026 para receber um Starter Pack técnico derivado das especificações RFB. O conteúdo em preparação ficará em uma branch e PR próprios antes da integração na `main`.
+**Estado verificado em 23/11/2026:** aplicação demonstrativa G4 implementada e testada no Chromium, WebGL via SwiftShader e Firebase Emulator. **Não há deploy Cloudflare/Firebase real e não se trata de sistema comercial homologado.** Desenvolvimento em [PR #1 Draft](https://github.com/CristianoRFB/RFB-3D-studio/pull/1), sem merge na `main`.
 
-**Fonte do Starter Pack:** [RFB Method GPT — 06-rfbstudio](https://github.com/CristianoRFB/rfb-method-gpt/tree/feature/portfolio-seven-labs-14-starter-v1/portfolio/projetos/06-rfbstudio). A coleção contém 14 produtos, mas este repo é independente.
+> **Escolha, visualize e transforme.** Configurador visual de produtos 3D usando React 19, TypeScript, Vite, Three.js, React Three Fiber e integrações Firebase opcionais.
 
-**Estado declarado:** `G0_PLANNING / APP_NOT_IMPLEMENTED / TESTS_NOT_RUN / DEPLOY_NOT_DONE`.
+## O que funciona no código e no ambiente de testes
 
-Meta de infraestrutura: R$0 de custo recorrente adicional, sem ativar cobranças/contas/serviços em produção. Nunca usar dados reais nos protótipos antes de revisão de privacidade.
+- **Render 3D:** Garrafa Aura, Luminária Órbita e Vaso Nexo — geometria procedural original; rotação, zoom, pan, acabamento e tamanho, com acessórios visuais efetivos.
+- **Fallback/acessibilidade:** prévia 2D com acessórios, modo qualidade reduzida, teclado, `prefers-reduced-motion` e WebGL no Chromium/SwiftShader.
+- **Catálogo:** busca, 4 cores, acabamentos, 3 tamanhos, acessórios, quantidades 1–10, 6 presets e regras de compatibilidade/preço em centavos.
+- **Designs e orçamento locais:** edição, salvar/retomar, carrinho, simulações, métricas locais, links de configuração, export JSON, SVG e screenshot PNG 3D.
+- **Privacidade:** backup local JSON, restauração com validação, exclusão confirmada e aviso de offline.
+- **Importação GLB local:** até 8 MB; glTF 2.0 com validação de geometria e referências internas; nenhuma mídia é enviada ou precificada automaticamente.
+- **Firebase opcional:** cadastro/login/logout/recuperação de acesso e CRUD de designs por UID com revisão; verificados com Authentication e Firestore Emulator e duas contas sintéticas.
+- **Modelos por tenant:** metadados de modelos originais, permissões de Designer/Vendedor/Admin atribuídas por custom claims, com negações de acesso entre usuários/tenants testadas em emuladores.
+- **Worker opcional:** `/api/demo-quote` stateless; `/api/private/quotes` autenticado, com rate limiting e idempotência, desligado por padrão até configurar infraestrutura de confiança. **Não há pagamentos ou mensagens reais.**
+
+## Ambiente de desenvolvimento
+
+Node.js 22, `npm ci` a partir de lockfile versionado e nenhum segredo incluído no GitHub:
+
+```sh
+npm ci
+npm run typecheck
+npm run test
+npm run build
+npm run perf:budget
+npm run rules:test
+npx playwright install --with-deps chromium
+npm run e2e
+npm run dev
+```
+
+A execução de CI inclui também o modo WebGL e o teste Auth+Firestore em emuladores separados, com variáveis de ambiente **sintéticas**. Para configurar um projeto Firebase autorizado, começar em [`.env.example`](.env.example) e seguir [DEPLOY-PLAN.md](docs/DEPLOY-PLAN.md). O backend de quote requer segredos server-side e binding de Rate Limiting, nunca variáveis `VITE_*`.
+
+## Evidência
+
+- [CI do código 35f822ca: 24 testes unitários; 40 verificações Firestore; 7 E2E comuns, 2 WebGL e 1 Auth; `npm ci`, audit e build](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45179480137).
+- Orçamento de bundles verificado: **340 KiB gzip inicial / 516,7 KiB gzip total JS**. Não é um resultado Lighthouse ou medição de FPS.
+- [Progresso e critérios AC](docs/METHOD-COVERAGE.md) · [Handoff](docs/HANDOFF.md) · [Roadmap](docs/ROADMAP.md) · [Segurança](docs/BACKEND-SECURITY.md).
+- [Especificação original](docs/ESPECIFICACAO-RFB.txt) · [Starter Pack](docs/STARTER-PACK.md) · [Diagramas](docs/DIAGRAMAS.md) · [Arquitetura de implementação](docs/ARCHITECTURE-IMPLEMENTED.md).
+- [Pesquisa comparativa G0](docs/RESEARCH-CONFIGURATORS.md) · [58 telas e UX](docs/UX-DESIGN-AND-QA.md) · [Assets e licenças](docs/ASSETS-LICENSES.md) · [Infra/custo](docs/INFRA-COSTS.md).
+
+**Bloqueios atuais:** Firebase real/claims/credenciais, Worker + persistência testados no runtime Cloudflare, autorização e QA de preview isolado, acessibilidade/dispositivos físicos e validação comercial. [Issue #2](https://github.com/CristianoRFB/RFB-3D-studio/issues/2), [#3](https://github.com/CristianoRFB/RFB-3D-studio/issues/3) e [#4](https://github.com/CristianoRFB/RFB-3D-studio/issues/4) permanecem abertas. **Meta de R$0/mês adicional**, sujeita a quotas verificadas; nenhum billing foi ativado.
+
+## Galeria visual do produto
+
+Capturas reais serão adicionadas após QA desktop/mobile em staging local com dados sintéticos. Os quatro quadros abaixo estão **pendentes**, não são imagens do aplicativo publicado.
+
+| Experiência a documentar | Captura |
+|---|---|
+| 1. Catálogo 3D | Pendente de captura verificável |
+| 2. Personalização e render | Pendente de captura verificável |
+| 3. Resumo de preço e variantes | Pendente de captura verificável |
+| 4. Configuração salva/carrinho | Pendente de captura verificável |
+
+[Manifesto de capturas e evidências](docs/screenshots/manifest.json). Nenhuma imagem artificial deve ser apresentada como screenshot funcional.
+
+---
+
+<div align="center">
+  <img src="public/brand/assinatura-rfb.svg" width="70" alt="Assinatura institucional RFB"/>
+  
+  <sub>Desenvolvido por RFB · assinatura do criador, independente da marca do aplicativo.</sub>
+</div>
+
+## Atualização funcional 23/11/2026
+
+A demonstração também oferece: marca SVG local na barra e favicon; carregamento lazy do motor 3D (bundle inicial ~81 KiB gzip); alternativa 2D e recuperação após falhas do WebGL; teste real de falha ao carregar módulo JS com fallback 2D aprovado no CI; central de ajuda, 404, exportação parcial dos próprios designs/quotes do Firebase Emulator, proteção de edição concorrente, exclusão de solicitações autenticadas, resumo de orçamento TXT e preparação opcional de `mailto:` sem destinatário nem envio.
+
+[CI recente aprovado #45305670927](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45305670927): 32 testes Vitest, 40 verificações Firestore Rules, 2 cenários quote+Firestore Emulator, 15 E2E Chromium, 3 WebGL/SwiftShader e 2 Auth+Firestore Emulator. **Não representa homologação comercial**.
+
+**Bloqueio de entrega pública e de 90% integral:** não há projeto Firebase Spark dedicado conectado, Cloudflare Workers preview com OAuth/RateLimiter/testes, catálogo e preços comerciais reais, revisão de segurança/legal e validação em GPU/dispositivos físicos. Estas etapas exigem ambiente autorizado e conferência das franquias gratuitas. O PR #1 permanece Draft.
+
+## EVOLVE 02 — biblioteca e motor GLB (26/11/2026)
+
+Baseline EVOLVE 01: [CI #45760264431](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45760264431), SHA `de05bec7f3daca9c1630a0afc53d60ad45bff2ba`, PASS.
+
+- Biblioteca GLB IndexedDB local, gravação voluntária, reabertura após recarga, download do arquivo original, exclusão individual confirmada e limpeza na seção Privacidade. Limites: 6 modelos, 24 MiB totais, 8 MiB por modelo. Backup JSON não contém GLBs; download individual disponível. Sem upload/sincronização comercial.
+- Validação de intervalos binários, accessors e instâncias; prévia restrita a geometria estática sem texturas, animações ou extensões até homologação de limites de decodificação. Fallback 2D de arquivo externo informa indisponibilidade, sem simular geometria ou preço de catálogo.
+- Testes Vitest de limites/validação e Playwright de persistência, exportação byte a byte, cancelamento de exclusão, limpeza e captura real programada. **CI no HEAD novo e inspeção visual da captura pendentes**; GPU física, WCAG, nuvem, assets licenciados e demais gates de produção continuam abertos.
+- Protocolos aplicados: AntiVibeCoding (testes e evidências), Anti-Preguiça (fluxo persistente e privacidade), Criatividade (biblioteca reutilizável sem infraestrutura paga), Anti-AI Slop (sem falso render ou imagem inventada), QA visual (captura automatizada prevista; revisão manual não realizada), STOP (nenhum deploy/custo/aceite inventado).

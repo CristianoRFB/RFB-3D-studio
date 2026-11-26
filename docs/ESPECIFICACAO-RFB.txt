@@ -1,0 +1,234 @@
+# RFB — Especificação de marca atualizada; fonte histórica original arquivada separadamente.
+
+RFBSTUDIO — ESPECIFICAÇÃO COMPLETA
+======================================================================
+Status: concepção. Produto: RFBStudio. Segmento: Personalização de produtos 3D. Slogan: Escolha, visualize e transforme.
+
+O PROBLEMA
+Vendedores de produtos customizados precisam explicar variantes e mostrar como a personalização afetará o resultado e o preço.
+
+QUEM USA
+Consumidores, marcas de produtos customizados e designers.
+
+PROPOSTA DE VALOR
+Mudar cores e acessórios altera modelo e preço mantendo configurações ao recarregar.
+
+IDENTIDADE DO DESIGN
+Produto 3D central, barra de opções à direita, configurações e preço vivos.
+
+STACK
+React + TypeScript + Vite; Cloudflare Workers / Static Assets; Firebase Auth / Firestore; ferramentas opcionais conforme módulo.
+
+ORIENTAÇÃO DE CUSTO
+Modelos leves e assets estáticos cabem em demo; render cloud e modelos pesados elevam custo.
+
+ARQUITETURA ESPECIALIZADA
+Three.js + React Three Fiber; Firestore para configurações; assets 3D versionados na Cloudflare.
+
+RISCO PRINCIPAL
+Modelos 3D exigem autoria/licença; otimizar GLB, textura e LOD para mobile.
+
+
+======================================================================
+ATORES E AUTORIZAÇÃO
+======================================================================
+1. Visitante: visão e operações limitadas a seu papel; validar no servidor e nas rules.
+2. Cliente: visão e operações limitadas a seu papel; validar no servidor e nas rules.
+3. Designer: visão e operações limitadas a seu papel; validar no servidor e nas rules.
+4. Vendedor: visão e operações limitadas a seu papel; validar no servidor e nas rules.
+5. Administrador: visão e operações limitadas a seu papel; validar no servidor e nas rules.
+
+
+======================================================================
+MÓDULOS E PROPÓSITO
+======================================================================
+01. Catálogo 3D: tela de listagem, detalhe, operação, estados de falha e permissão.
+02. Visualizador: tela de listagem, detalhe, operação, estados de falha e permissão.
+03. Materiais e cores: tela de listagem, detalhe, operação, estados de falha e permissão.
+04. Opções e variantes: tela de listagem, detalhe, operação, estados de falha e permissão.
+05. Preço dinâmico: tela de listagem, detalhe, operação, estados de falha e permissão.
+06. Salvar design: tela de listagem, detalhe, operação, estados de falha e permissão.
+07. Orçamento: tela de listagem, detalhe, operação, estados de falha e permissão.
+08. Carrinho: tela de listagem, detalhe, operação, estados de falha e permissão.
+09. Biblioteca de modelos: tela de listagem, detalhe, operação, estados de falha e permissão.
+10. Painel de vendas: tela de listagem, detalhe, operação, estados de falha e permissão.
+
+
+======================================================================
+FUNCIONALIDADES, REGRAS E LIMITES
+======================================================================
+01. Visualização 3D. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+02. Orbit/pan/zoom acessíveis. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+03. Troca de materiais. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+04. Variações de tamanho. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+05. Atualização de preço. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+06. Salvar configuração. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+07. Exportar visualização. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+08. Galeria de presets. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+09. Orçamento por configuração. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+10. Modo qualidade reduzida. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+11. Fallback 2D. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+12. Painel de modelos. Implementar autorização, input validation, estado de carregamento, estado vazio, erro com recuperação, logs apropriados e teste E2E.
+
+
+======================================================================
+JORNADA PRINCIPAL E CASOS ALTERNATIVOS
+======================================================================
+1. Escolher produto.
+2. Carregar modelo.
+3. Alterar cor/material.
+4. Recalcular preço.
+5. Salvar configuração.
+6. Enviar orçamento.
+
+Em qualquer etapa: usuário não autenticado, sem permissão, conexão interrompida, item removido, limite excedido, edição concorrente, tentativa duplicada e retomada são fluxos previstos.
+
+
+======================================================================
+MÁQUINA DE ESTADOS
+======================================================================
+inicial -> personalizando -> salva -> orcada -> enviada -> aprovada
+Cada transição deve definir ator permitido, pré-condição, pós-condição, efeito externo, política de retry e log; setar transições ilegais como erro de domínio.
+
+
+======================================================================
+ENTIDADES DE DOMÍNIO
+======================================================================
+1. Usuario: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+2. Produto: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+3. Modelo3D: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+4. Material: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+5. Variante: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+6. Configuracao: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+7. Opcao: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+8. Orcamento: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+9. Pedido: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+10. ImagemRender: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+11. LicencaModelo: id, status, owner/tenant, campos especializados, versionamento e timestamps.
+
+
+======================================================================
+CATÁLOGO EXAUSTIVO DE TELAS
+======================================================================
+T001 — Landing / apresentação. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T002 — Cadastro / criar conta. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T003 — Login e recuperar acesso. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T004 — Onboarding e perfil. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T005 — Página principal / feed. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T006 — Busca e filtros. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T007 — Detalhes do recurso. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T008 — Fluxo de criação. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T009 — Fluxo de edição. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T010 — Confirmação / revisão. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T011 — Estado concluído / recibo. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T012 — Lista pessoal / histórico. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T013 — Notificações. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T014 — Mensagens ou contato. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T015 — Central de ajuda. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T016 — Preferências e privacidade. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T017 — Acesso e segurança. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T018 — Página vazia / primeira vez. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T019 — Carregamento e skeleton. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T020 — Erro de rede / retentar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T021 — Sem permissão / bloqueio. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T022 — Estado de conflito concorrente. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T023 — Admin: visão geral. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T024 — Admin: gestão de usuários. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T025 — Admin: moderação e auditoria. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T026 — Admin: regras e configurações. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T027 — Admin: relatórios. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T028 — Página 404 / recurso indisponível. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T029 — Módulo / Catálogo 3D — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T030 — Módulo / Catálogo 3D — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T031 — Módulo / Catálogo 3D — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T032 — Módulo / Visualizador — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T033 — Módulo / Visualizador — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T034 — Módulo / Visualizador — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T035 — Módulo / Materiais e cores — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T036 — Módulo / Materiais e cores — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T037 — Módulo / Materiais e cores — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T038 — Módulo / Opções e variantes — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T039 — Módulo / Opções e variantes — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T040 — Módulo / Opções e variantes — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T041 — Módulo / Preço dinâmico — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T042 — Módulo / Preço dinâmico — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T043 — Módulo / Preço dinâmico — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T044 — Módulo / Salvar design — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T045 — Módulo / Salvar design — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T046 — Módulo / Salvar design — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T047 — Módulo / Orçamento — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T048 — Módulo / Orçamento — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T049 — Módulo / Orçamento — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T050 — Módulo / Carrinho — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T051 — Módulo / Carrinho — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T052 — Módulo / Carrinho — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T053 — Módulo / Biblioteca de modelos — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T054 — Módulo / Biblioteca de modelos — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T055 — Módulo / Biblioteca de modelos — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T056 — Módulo / Painel de vendas — lista. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T057 — Módulo / Painel de vendas — detalhe. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+T058 — Módulo / Painel de vendas — criar/editar. Definir layout desktop/mobile, componentes acessíveis, vazio, carregando, erro, sem permissão e estados extremos.
+
+
+======================================================================
+CHECKLIST DE ACEITE
+======================================================================
+AC-01: Visualização 3D — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-02: Orbit/pan/zoom acessíveis — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-03: Troca de materiais — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-04: Variações de tamanho — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-05: Atualização de preço — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-06: Salvar configuração — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-07: Exportar visualização — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-08: Galeria de presets — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-09: Orçamento por configuração — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-10: Modo qualidade reduzida — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-11: Fallback 2D — persistência, autorização, concorrência, teste de integração, teste E2E.
+AC-12: Painel de modelos — persistência, autorização, concorrência, teste de integração, teste E2E.
+
+
+======================================================================
+SEGURANÇA/PRIVACIDADE E COMPLIANCE
+======================================================================
+Risco específico: Modelos 3D exigem autoria/licença; otimizar GLB, textura e LOD para mobile.
+Negar acesso por padrão; evitar PII em logs; segregação por conta/empresa; rate limits; verificação de token no Worker; hooks de webhook com assinatura; inventário de dados, retenção e eliminação; prova de consentimento quando aplicável; testes OWASP ASVS 5.0.
+
+
+======================================================================
+ESTRATÉGIA DE TESTES
+======================================================================
+Vitest para regras de domínio, Firebase Emulator para rules, Playwright em 390/768/1440px, contratos HTTP, fuzz de autorização, testes com duas sessões em paralelo, QA manual com leitor de tela, teste de carga moderado e observabilidade.
+
+
+======================================================================
+BACKLOG E EVOLUÇÃO
+======================================================================
+G0: documentação. G1: repositório e infraestrutura local. G2: um fluxo completo. G3: todos os atores principais. G4: integrações especializadas. G5: segurança/QA/auditoria. G6: deploy e demo pública.
+Não ativar custos externos antes de aprovar estimativa e limites.
+
+
+======================================================================
+REFERÊNCIAS
+======================================================================
+Pesquisa de tecnologias - Stack Overflow Survey 2026 — https://survey.stackoverflow.co/2026/technology/data
+State of JS 2025 — https://stateofjs.com/en-US
+Cloudflare Workers + Static Assets — https://developers.cloudflare.com/workers/static-assets/
+Cloudflare Workers limites — https://developers.cloudflare.com/workers/platform/limits/
+Cloudflare CLI cf — https://developers.cloudflare.com/cf/projects/
+Cloudflare R2 preços — https://developers.cloudflare.com/r2/pricing/
+Cloudflare Stream preços — https://developers.cloudflare.com/stream/pricing/
+Cloudflare Realtime SFU preços — https://developers.cloudflare.com/realtime/sfu/platform/pricing/
+Firebase preços — https://firebase.google.com/pricing
+Firestore Standard edition — https://firebase.google.com/docs/firestore/standard-edition
+Firestore melhores práticas — https://firebase.google.com/docs/firestore/best-practices
+Firestore transações — https://firebase.google.com/docs/firestore/manage-data/transactions
+Firebase Storage mudança de billing — https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024
+Firebase Auth: validar ID token — https://firebase.google.com/docs/auth/admin/verify-id-tokens
+Firebase Emulator Suite — https://firebase.google.com/docs/emulator-suite
+OWASP ASVS 5.0 — https://asvs.owasp.org/
+WCAG 2.2 W3C — https://www.w3.org/WAI/standards-guidelines/wcag/
+Nielsen Norman Group heurísticas — https://www.nngroup.com/articles/ten-usability-heuristics/
+OpenStreetMap Tile Usage Policy — https://operations.osmfoundation.org/policies/tiles/
+Google Maps preços — https://developers.google.com/maps/billing-and-pricing/overview
+Mercado Pago split — https://www.mercadopago.com.br/developers/pt/docs/split-payments/split-1-1/integration-configuration/integrate-marketplace
+Mercado Pago Pix — https://www.mercadopago.com.br/developers/pt/docs/checkout-api-orders/payment-integration/websites/pix

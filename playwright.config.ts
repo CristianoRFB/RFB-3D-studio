@@ -1,0 +1,16 @@
+import { defineConfig, devices } from '@playwright/test';
+export default defineConfig({
+  testDir: './e2e',
+  testIgnore: process.env.RFB_CLOUD_E2E === '1' ? ['**/webgl.spec.ts', '**/studio.spec.ts'] :
+    process.env.RFB_WEBGL_E2E === '1' ? ['**/cloud.spec.ts', '**/studio.spec.ts'] :
+    ['**/cloud.spec.ts', '**/webgl.spec.ts'],
+  fullyParallel: true,
+  retries: process.env.CI ? 1 : 0,
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]] : 'list',
+  use: { baseURL: 'http://127.0.0.1:5173', trace: 'retain-on-failure',
+    launchOptions: process.env.RFB_WEBGL_E2E === '1' ?
+      { args: ['--enable-webgl', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } : {},
+  },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  webServer: { command: 'npm run dev', url: 'http://127.0.0.1:5173', reuseExistingServer: !process.env.CI, timeout: 60000 },
+});

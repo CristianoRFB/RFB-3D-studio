@@ -1,0 +1,41 @@
+{
+  "name": "RFBStudio",
+  "slug": "06-rfbstudio",
+  "segment": "Personalização de produtos 3D",
+  "slogan": "Escolha, visualize e transforme",
+  "accent": "#9A76FF",
+  "steps": [
+    "Escolher produto",
+    "Carregar modelo",
+    "Alterar cor/material",
+    "Recalcular preço",
+    "Salvar configuração",
+    "Enviar orçamento"
+  ],
+  "modules": [
+    "Catálogo 3D",
+    "Visualizador",
+    "Materiais e cores",
+    "Opções e variantes",
+    "Preço dinâmico",
+    "Salvar design",
+    "Orçamento",
+    "Carrinho",
+    "Biblioteca de modelos",
+    "Painel de vendas"
+  ],
+  "features": [
+    "Visualização 3D",
+    "Orbit/pan/zoom acessíveis",
+    "Troca de materiais",
+    "Variações de tamanho",
+    "Atualização de preço",
+    "Salvar configuração",
+    "Exportar visualização",
+    "Galeria de presets",
+    "Orçamento por configuração",
+    "Modo qualidade reduzida",
+    "Fallback 2D",
+    "Painel de modelos"
+  ]
+}

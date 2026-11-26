@@ -1,0 +1,39 @@
+{
+  "name": "06-rfbstudio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run tests --exclude tests/quote-emulator.test.ts",
+    "e2e": "playwright test",
+    "rules:test": "firebase emulators:exec --only firestore --project demo-rfb-studio-tests \"node tests/firestore.rules.mjs\"",
+    "perf:budget": "node scripts/check-bundle.mjs",
+    "quotes:emulator": "firebase emulators:exec --only firestore --project demo-rfb-studio-tests \"npx vitest run tests/quote-emulator.test.ts\""
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.8.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.187.0",
+    "firebase": "^13.4.0",
+    "jose": "^6.2.18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.187.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^3.2.0",
+    "@playwright/test": "^1.58.0",
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase-tools": "^15.37.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.7"
+  }
+}

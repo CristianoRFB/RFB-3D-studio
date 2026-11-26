@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "product": "RFBStudio",
+  "status": "NOT_CAPTURED",
+  "screenshots": [
+    {
+      "id": "S1",
+      "caption": "Catálogo 3D",
+      "status": "NOT_CAPTURED",
+      "kind": "REAL_CAPTURE",
+      "path": null,
+      "commit_sha": null,
+      "viewport": null,
+      "captured_at": null,
+      "environment": null,
+      "privacy_checked": false
+    },
+    {
+      "id": "S2",
+      "caption": "Personalização e render",
+      "status": "NOT_CAPTURED",
+      "kind": "REAL_CAPTURE",
+      "path": null,
+      "commit_sha": null,
+      "viewport": null,
+      "captured_at": null,
+      "environment": null,
+      "privacy_checked": false
+    },
+    {
+      "id": "S3",
+      "caption": "Resumo de preço e variantes",
+      "status": "NOT_CAPTURED",
+      "kind": "REAL_CAPTURE",
+      "path": null,
+      "commit_sha": null,
+      "viewport": null,
+      "captured_at": null,
+      "environment": null,
+      "privacy_checked": false
+    },
+    {
+      "id": "S4",
+      "caption": "Configuração salva/carrinho",
+      "status": "NOT_CAPTURED",
+      "kind": "REAL_CAPTURE",
+      "path": null,
+      "commit_sha": null,
+      "viewport": null,
+      "captured_at": null,
+      "environment": null,
+      "privacy_checked": false
+    }
+  ],
+  "notes": "Screenshots reais não estão versionados nesta branch; nenhum mockup deve ser rotulado como prova."
+}
