@@ -100,3 +100,13 @@
 | Portfólio profissional | `NOT_ADDED` | Worker existente preservado |
 
 **Próxima ação executável no futuro repo:** depois do usuário criar o repositório, importar assets com hashes, fazer pesquisa de nicho, escrever critério G2 e implementar o primeiro fluxo com teste real. Registrar avanço em `ROADMAP.md`, `STATE.json`, `PROGRESS.md` e Issues/PRs somente após execução.
+
+## EVOLVE 01 — 26/11/2026
+
+- [x] Confirmar CI do HEAD anterior ec9bf6ae: [45306056459](https://github.com/CristianoRFB/RFB-3D-studio/actions/runs/45306056459) success.
+- [x] Consultar Workers e subdomínio; nome candidato `rfb-studio-preview` não listado, subdomínio `on7`.
+- [x] Adicionar preflight de configuração e smoke sintético sem persistência; integrar na CI.
+- [x] Corrigir exceção do rate limiter: negar operação com 503 sanitizado e teste de regressão.
+- [ ] Aprovar CI no HEAD novo; smoke real após deploy isolado.
+- [ ] Confirmar plano Cloudflare (consulta de subscriptions HTTP 403, falta Billing Read) e projeto Firebase Spark dedicado (administração não disponível neste chat).
+- [ ] Configurar preview com quotes desligados, testar roteamento, Auth e Rules reais; depois OAuth/REST/limiter e rollback. Nenhuma alteração em conta, billing ou produção.
