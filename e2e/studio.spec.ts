@@ -210,3 +210,36 @@ test('falha ao buscar o módulo 3D preserva a prévia 2D e informa recuperação
   await expect(page.getByRole('img', { name: 'Ilustração 2D: Garrafa Aura' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Recarregar visualizador' })).toBeVisible();
 });
+
+test('biblioteca GLB: persistência, reabertura, download e exclusão de privacidade', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('checkbox', {name:'Prévia 2D'}).check();
+  await page.getByLabel('Arquivo GLB local').setInputFiles({name:'triangulo-autoral.glb',mimeType:'model/gltf-binary',buffer:Buffer.from(createTriangleGLB())});
+  await expect(page.getByText(/GLB carregado localmente/)).toBeVisible();
+  await page.getByRole('button',{name:'Salvar na biblioteca local'}).click();
+  await expect(page.getByRole('heading',{name:'triangulo-autoral.glb'})).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading',{name:'triangulo-autoral.glb'})).toBeVisible();
+  await page.getByRole('button',{name:'Abrir GLB salvo'}).click();
+  await expect(page.getByRole('button',{name:'Adicionar ao carrinho demo'})).toBeDisabled();
+  const pending=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Baixar GLB'}).click();
+  const file=await pending;
+  expect(file.suggestedFilename()).toBe('triangulo-autoral.glb');
+  const {readFile}=await import('node:fs/promises');
+  expect((await readFile(await file.path())).equals(Buffer.from(createTriangleGLB()))).toBeTruthy();
+  await page.getByRole('checkbox',{name:'Prévia 2D'}).check();
+  await expect(page.getByText('Prévia do GLB indisponível em 2D.')).toBeVisible();
+  await mkdir('artifacts',{recursive:true});
+  await page.screenshot({path:'artifacts/rfb-studio-glb-library.png',fullPage:true});
+  await page.getByRole('button',{name:'Excluir GLB',exact:true}).click();
+  await page.getByRole('button',{name:'Cancelar',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'triangulo-autoral.glb'})).toBeVisible();
+  await page.getByRole('navigation',{name:'Seções do estúdio'}).getByRole('button',{name:'Privacidade'}).click();
+  await page.getByRole('checkbox',{name:'Confirmo que desejo apagar meus registros locais.'}).check();
+  await page.getByRole('button',{name:'Excluir todos os dados locais'}).click();
+  await expect(page.getByText(/Registros locais excluídos/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText(/Nenhum modelo salvo/)).toBeVisible();
+  await expect(page.getByRole('heading',{name:'triangulo-autoral.glb'})).toHaveCount(0);
+});
