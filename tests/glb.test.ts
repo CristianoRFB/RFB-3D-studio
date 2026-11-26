@@ -60,3 +60,15 @@ describe('proteções da prévia GLB contra complexidade e referências insegura
     expect(() => inspectGLB(mutateGLB(g => {g.images = [{uri:'data:text/html;base64,PGgxPg=='}]}))).toThrow(/URI/);
   });
 });
+
+describe('limites binários e de instâncias da biblioteca GLB', () => {
+  it('rejeita bufferViews fora do arquivo e accessors fora do intervalo', () => {
+    expect(() => inspectGLB(mutateGLB(g => {g.bufferViews[0].byteLength=9999}))).toThrow(/buffer/);
+    expect(() => inspectGLB(mutateGLB(g => {g.accessors[0].count=100}))).toThrow(/buffer/);
+    expect(() => inspectGLB(mutateGLB(g => {g.accessors[1].sparse={count:1}}))).toThrow(/Accessor/);
+  });
+  it('não permite conteúdo animado ou texturas não homologadas', () => {
+    expect(() => inspectGLB(mutateGLB(g => {g.images=[{bufferView:0,mimeType:'image/png'}]}))).toThrow(/geometria estática/);
+    expect(() => inspectGLB(mutateGLB(g => {g.extensionsUsed=['KHR_texture_transform']}))).toThrow(/geometria estática/);
+  });
+});
