@@ -129,3 +129,5 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{o
 .quote-email-draft{display:inline-flex;align-items:center;justify-content:center;padding:10px 15px;text-decoration:none;border-radius:10px;border:1px solid #55607e;color:#f7f6ff}
 .quote-email-draft:hover{background:#333b59}
 .quote-email-draft:focus-visible{outline:3px solid #d2bcff;outline-offset:3px}
+
+.local-library{margin-top:20px;display:grid;gap:10px}.local-library h3,.local-library h4{margin:0;overflow-wrap:anywhere}.local-library .record-card{border-radius:16px}.local-library .record-actions{margin-top:10px}.import-status strong{overflow-wrap:anywhere;min-width:0}
